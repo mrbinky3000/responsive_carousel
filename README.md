@@ -33,3 +33,7 @@ Known Bugs
 - Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is contantly causing the broswer to do a reflow every few milliseconds.
 
 *The carousel runs a little slow on some droids.
+
+How To Use
+==========
+1) You need to supply a small, simple function that returns a width in integer form.  This is the "responsive" part.  Your function will basically look at the size of something, like the window, and then determine how many things to show in the carousel. 
