@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>responsiveCarosel Example</title>
+<title>responsiveCarosel Example - 1</title>
 <script src="lib/modernizr.min.js" type="text/javascript"></script>
 <style type="text/css">
 
@@ -136,7 +136,9 @@ However, the height remains untouched.
 	padding: 0;
 }
 
-/* Not required, but makes life a lot easier.  You will most likely want to keep it. */
+/* Not required, but makes life a lot easier.  You will most likely want to keep it.
+if you are concerned about older browsers, there are shims like:
+https://github.com/Schepp/box-sizing-polyfill  */
 .slider li * {
 	box-sizing: border-box;
 }
@@ -161,7 +163,7 @@ it with your own stuff.  */
 <body>
 <h1>Example 1</h1>
 <p>A simple product carousel.</p>
-<div class="kill-long-press" id="example-1">
+<div class="kill-long-press examples" id="example-1">
 	<div class="slider">
 		<div class="slider-nav">
 			<div class="arrow-left arrow"><a href="#" title="Back"></a></div>
@@ -197,6 +199,8 @@ it with your own stuff.  */
 
 /* Okay, everything is loaded. Let's go! (on dom ready) */
 $(function(){
+  
+  /* a generic product carousel - something that might appear in the body of a e-commerce site. */
   $('#example-1')
     .responsiveCarousel({
         unitWidth: 'compute',
@@ -215,13 +219,14 @@ $(function(){
           // perform all sorts of cleanup here if you wish.  See my makeSameHeight jQuery plugin on github!
         }
     });
+	
 });
 
 /* bleh... CSS media queries seem to be applied sometime after the document.ready and before the
-window.load events.  If you are using the redraw callback, you should call it again after the page
-loads. Not my fault! Blame your browser! :-) */
+window.load events.  If you are using the "onRedraw" callback, you should call it again after the page
+is finished loading. Not my fault! Blame your browser! :-) */
 $(window).on('load',function(){
-    $('.slider').responsiveCarousel('redraw');
+    $('.examples').responsiveCarousel('redraw');
 });
 
 
