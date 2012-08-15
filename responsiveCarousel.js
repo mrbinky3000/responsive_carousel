@@ -1,10 +1,16 @@
+
+
 /*!
  * responsiveCarousel
- * A responsive carousel that works in desktop browsers, ipad, iphone,and even most droids.
+ * A responsive carousel that works in desktop browsers, ipad, iphone, and even
+ * most Androids.  It uses css3 animations with a jquery animation fallback for
+ * greater speed.  The code was optimized to minimize page reflows to further
+ * enhance the overall speed.
+ *
  * This is a jQuery UI Widget
  *
  * @author Matthew Toledo
- * @requires jQuery, jQuery UI Core, jQuery UI Widget Factory, modernizr, hammer.js
+ * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test), hammer.js
  */
 (function ( $, window, document, undefined ) {
     "use strict";
@@ -23,11 +29,13 @@
             unitWidth: 'inherit',
             responsiveUnitSize: null,
             onRedraw: null,
-            dragEvents: false
+            dragEvents: false,
+            cssAnimations: Modernizr.cssanimations
         },
 
         // a place to store internal vars used only by this instance of the widget
         internal: {
+            left:0,
             targetWidth: 0,
             unitWidth: 0,
             targetOuterWidth: 0,
@@ -42,7 +50,8 @@
             arrowRightVisible: true,
             targetLeft: 0,
             timer: null,
-            firstMouseClick: false
+            firstMouseClick: false,
+            prefix: null
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -60,6 +69,59 @@
                 }
             };
         },
+
+        _getPrefix: function (prop) {
+            var prefixes = ['Moz', 'Webkit', 'Khtml', '0', 'ms'],
+                elem = document.createElement('div'),
+                upper = prop.charAt(0).toUpperCase() + prop.slice(1),
+                pref = "";
+
+            for (var len = prefixes.length; len--;) {
+                if ((prefixes[len] + upper) in elem.style) {
+                    pref = (prefixes[len]);
+                }
+            }
+
+            if (prop in elem.style) {
+                pref = (prop);
+            }
+
+            return '-' + pref.toLowerCase() + '-';
+
+        },
+
+
+        _animate: function ($target, props, speed, easing, callback) {
+            var options = this.options,
+                internal = this.internal,
+                animationOptions = speed && typeof speed === "object" ? jQuery.extend({}, speed) : {
+                complete:callback || !callback && easing ||
+                    jQuery.isFunction(speed) && speed,
+                duration:speed,
+                easing:callback && easing || easing && !jQuery.isFunction(easing) && easing
+            };
+
+
+            return $target.each(function () {
+                var $this = $(this),
+                    easing = (animationOptions.easing) ? easing : 'ease-in-out',
+                    prefix = (internal.prefix);
+                if (options.cssAnimations) {
+                    $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ease-in-out').css(props);
+                    setTimeout(function () {
+                        $this.css(prefix + 'transition', '');
+                        if ($.isFunction(animationOptions.complete)) {
+                            animationOptions.complete();
+                        }
+                    }, speed);
+                }
+                else {
+                    $this.animate(props, speed, animationOptions);
+                }
+            });
+        },
+
+
 
         /**
          * Compute the new width for the target element (the element that holds all the things
@@ -144,7 +206,7 @@
             }
             if (false === busy) {
                 busy = true;
-                $target.animate({left:this.computeAdjust($target)},400,function(){
+                this._animate($target,{left:this.computeAdjust($target)},400,function(){
                     busy = false;
                 });
             }
@@ -166,6 +228,18 @@
                 $arrowRight = $(this.element).find(options.arrowRight),
                 eventStringDown = "",
                 eventStringUp = "";
+
+            /*
+            var _clearInterval = function() {
+                if ('number' === typeof t) {
+                    internal.isArrowBeingClicked  = false;
+                    clearInterval(internal.timer);
+                }
+                if (false === busy) {
+                    $target.animate({left:that.computeAdjust($target)},400);
+                }
+            };
+            */
 
 			/* not used yet - do a mouse up event if too far left or right while pressing arrow */
             var _checkTooFar = function($target) {
@@ -213,7 +287,7 @@
                     _checkTooFar($target);
                 } else {
                     busy = true;
-                    $target.animate({left:newLeft},400,function(){
+                    that._animate($target,{left:newLeft},400,function(){
                         that._setArrowVisibility();
                         busy = false;
                         _checkTooFar($target);
@@ -426,7 +500,7 @@
                 content = $target,
                 hammer = new Hammer($mask.get(0),{
                     drag:true,
-                    drag_vertical:true,
+                    drag_vertical:false,
                     drag_horizontal:true,
                     drag_min_distance:0,
                     transform:false,
@@ -482,19 +556,36 @@
 					ev.distance = 0 - ev.distance;
 				}
 				left = scroll_start.left + ev.distance * delta;
+                internal.left = left;
 				content.css('left',left);
-                
+
 
             };
 
             hammer.ondragend = function(ev) {
 
-                $target.stop(true,false).animate({left:that.computeAdjust($target)},400,function(){
+                $target.stop(true,false);
+                that._animate($target,{left:that.computeAdjust($target)},400,function(){
+                    console.log('animate dragend');
                     that._setArrowVisibility();
                     busy = false;
                 });
 
             }
+        },
+
+        /**
+         * Extend jQuery so that Animations are done using css3 animations.  If css3 is not available,
+         * fall back to standard jQuery animations.   CSS3 animations are faster.  Thanks to
+         * http://addyosmani.com/blog/css3transitions-jquery/
+         * @private
+         */
+        _initAnimate:function () {
+
+            var sliderOptions = this.options;
+
+
+
         },
 
 
@@ -525,14 +616,20 @@
             // --------------------
             // backup original target element
             this.internal.targetBackupCopy = this.element;
-            // initialize the target
+            // if we are using css3 animations, determine the browser specific prefix (-ie,-moz,-webkit, etc)
+            if (this.options.cssAnimations) {
+                this.internal.prefix = this._getPrefix('transition');
+            }
+            // init the target DOM element's css
             $target.css({
                 'position':'relative',
                 'left':0
             });
+            // init touch events if applicable
             if (options.dragEvents === true) {
                 this._dragEvents();
             }
+
             this._setArrowEvents();
             this._setUnitWidth();
             this._setTargetWidth('first load');
