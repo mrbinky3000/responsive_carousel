@@ -1,38 +1,34 @@
 /*!
  * responsiveCarousel
- * A responsive carousel that works in desktop browsers, ipad, iphone, and even
- * most Androids.  It uses css3 animations with a jquery animation fallback for
- * greater speed.  The code was optimized to minimize page reflows to further
- * enhance the overall speed.
- *
+ * A responsive carousel that works in desktop browsers, ipad, iphone,and even most droids.
  * This is a jQuery UI Widget
  *
- * @version 0.2.0
- * @releaseDate 8/15/2012
  * @author Matthew Toledo
- * @url https://github.com/mrbinky3000/responsive_carousel
- * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test), hammer.js
+ * @requires jQuery, jQuery UI Core, jQuery UI Widget Factory, modernizr, hammer.js
  */
 (function ( $, window, document, undefined ) {
     "use strict";
     var busy = false;
 
+    // define your widget under a namespace of your choice
+    //  with additional parameters e.g.
+    // $.widget( "namespace.widgetname", (optional) - an
+    // existing widget prototype to inherit from, an object
+    // literal to become the widget's prototype );
 
-
-    $.widget( "ri.responsiveCarousel" , {
+    $.widget( "ri.RISimpleSlider" , {
 
         //Options to be used as defaults
         options: {
             arrowLeft: '.arrow-left a',
             arrowRight: '.arrow-right a',
             target: '.slider-target',
-            mask: '.slider-mask',
             unitElement: 'li',
             unitWidth: 'inherit',
             responsiveUnitSize: null,
             onRedraw: null,
             dragEvents: false,
-            cssAnimations: Modernizr.csstransitions
+            cssAnimations: Modernizr.cssanimations
         },
 
         // a place to store internal vars used only by this instance of the widget
@@ -96,19 +92,20 @@
         _animate: function ($target, props, speed, easing, callback) {
             var options = this.options,
                 internal = this.internal,
-                animationOptions = speed && typeof speed === "object" ? $.extend({}, speed) : {
-                    complete:callback || !callback && easing || $.isFunction(speed) && speed,
-                    duration:speed,
-                    easing:callback && easing || easing && !$.isFunction(easing) && easing
-                };
+                animationOptions = speed && typeof speed === "object" ? jQuery.extend({}, speed) : {
+                complete:callback || !callback && easing ||
+                    jQuery.isFunction(speed) && speed,
+                duration:speed,
+                easing:callback && easing || easing && !jQuery.isFunction(easing) && easing
+            };
 
 
             return $target.each(function () {
                 var $this = $(this),
                     easing = (animationOptions.easing) ? easing : 'ease-in-out',
                     prefix = (internal.prefix);
-
                 if (options.cssAnimations) {
+                    console.log('css animation')
                     $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ease-in-out').css(props);
                     setTimeout(function () {
                         $this.css(prefix + 'transition', '');
@@ -116,7 +113,8 @@
                             animationOptions.complete();
                         }
                     }, speed);
-                } else {
+                }
+                else {
                     console.log('standard');
                     $this.animate(props, speed, animationOptions);
                 }
@@ -135,6 +133,11 @@
          * @private
          */
         _setTargetWidth: function(caller) {
+            /*
+            console.log('caller:"',caller,'" internal.unitWidth:',internal.unitWidth);
+            console.log('num elements:',$target.find(options.unitElement).length);
+            console.log('new target width:', $target.find(options.unitElement).length * internal.unitWidth);
+            */
             var internal = this.internal,
                 options = this.options,
                 $el = $(this.element),
@@ -165,8 +168,15 @@
                 $arrowLeft = $(this.element).find(options.arrowLeft),
                 $arrowRight = $(this.element).find(options.arrowRight),
                 maskLeft = 0,
+                //maskRight = $el.outerWidth();
                 maskRight = internal.targetParentOuterWidth;
 
+            /*
+                console.log(
+                    'currentLeft:' + currentLeft,
+                    'currentRight:' + currentRight
+                );
+            */
 
             if (currentRight <= maskRight ) {
                 $arrowRight.hide();
@@ -231,11 +241,35 @@
                 eventStringDown = "",
                 eventStringUp = "";
 
+            /*
+            var _clearInterval = function() {
+                if ('number' === typeof t) {
+                    internal.isArrowBeingClicked  = false;
+                    clearInterval(internal.timer);
+                }
+                if (false === busy) {
+                    $target.animate({left:that.computeAdjust($target)},400);
+                }
+            };
+            */
 
-			/* not used yet - do a mouse up event if too far left or right while pressing arrow */
+            /* not used yet - do a mouse up event if too far left or right while pressing arrow */
             var _checkTooFar = function($target) {
                 var i = $target.position().left;
+                // console.log('_checkTooFar',i);
                 return;
+                /*
+                // too far right
+                if (i > 0) {
+                    busy = true;
+                    $target.animate({left:0},200,function(){
+                        that._setArrowVisibility();
+                        busy = false;
+                        _clearInterval();
+                    });
+                }
+                */
+
             };
 
 
@@ -358,7 +392,7 @@
          */
         _setUnitWidth: function () {
 
-            var w, m,
+            var w,
                 that = this,
                 internal = this.internal,
                 options = this.options,
@@ -367,22 +401,15 @@
                 $firstUnit = $target.find(options.unitElement).eq(0),
                 delay = new this.wait();
 
-
             var _importWidthFromDOM = function () {
                 internal.unitWidth = $firstUnit.outerWidth();
             };
 
-            var _setResponsiveUnitWidth = function () {
-                var maskInnerWidth = $el.find(options.mask).innerWidth();
-                m = options.responsiveUnitSize($el, internal, options);
-                if ('number' !== typeof m || m < 1) {
-                    throw new Error("The responsiveUnitSize callback must return a whole number greater than 0");
-                }
-                w = maskInnerWidth / m;
-                w = Math.floor(w);
-                $target.find(options.unitElement).css('width',w);
-            };
-
+            // TODO  DELETE THIS HACK
+            var tweak = 0;
+            /*if ($.browser.mozilla) {
+                tweak = 20;
+            }*/
 
 
             if (options.unitWidth === 'inherit') {
@@ -413,7 +440,8 @@
                 _importWidthFromDOM();
 
                 if ($.isFunction(options.responsiveUnitSize)) {
-                    _setResponsiveUnitWidth();
+                    w = options.responsiveUnitSize($el, internal, options);
+                    $target.find(options.unitElement).css('width',w - tweak);
                     _importWidthFromDOM();
                 }
                 if ($.isFunction(options.onRedraw)) {
@@ -427,7 +455,8 @@
                 $target.find('img').on('load',function(){
                     // fire the responsiveUnitSize callback
                     if ($.isFunction(options.responsiveUnitSize)) {
-                        _setResponsiveUnitWidth();
+                        w = options.responsiveUnitSize($el, internal, options);
+                        $target.find(options.unitElement).css('width',w - tweak);
                     }
                     _importWidthFromDOM();
                     that._setTargetWidth('compute');
@@ -445,7 +474,9 @@
 
                         // fire the responsiveUnitSize callback
                         if ($.isFunction(options.responsiveUnitSize)) {
-                            _setResponsiveUnitWidth();
+                            w = options.responsiveUnitSize($el, internal, options);
+                            //console.log('YO:',$target.find(options.unitElement));
+                            $target.find(options.unitElement).css('width',w - tweak);
                         }
 
                         // get the new width from the dom and store internally
@@ -457,7 +488,7 @@
                         // allowed on the left. (Which means there should not be any
                         // fractional units on the right either, if all goes well)
                         adjust = that.computeAdjust($target);
-
+                        //console.log('returned adjust:', adjust);
 
                         // if we are not animating a transition, update the scroll arrows
                         $target.css({left:adjust});
@@ -508,6 +539,13 @@
                 scroll_dim = {},
                 content_dim = {};
 
+
+            /*
+            console.log('touch events enabled');
+            console.log('container:', container);
+            console.log('content:', content);
+            */
+
             var getScrollPosition = function() {
                 return {
                     top: parseInt(content.css('top'),10),
@@ -515,7 +553,20 @@
                 }
             };
 
+            /**
+             * get the dimensions of an object
+             * @param jQuery el
+             * @return object { width:int, height:int }
 
+            var getDimensions = function(el) {
+                return {
+                    width:el.outerWidth(),
+                    height:el.outerHeight()
+                }
+            };
+             */
+
+            // delete?
             hammer.ondragstart = function() {
 
                 if (true === internal.isArrowBeingClicked || true === busy) {
@@ -526,12 +577,15 @@
 
                 busy = true;
 
+                //console.log('drag start');
                 scroll_start = getScrollPosition();
                 scroll_start.time = new Date().getTime();
+                //scroll_dim = getDimensions($mask);
                 scroll_dim = {
                     width: internal.targetParentOuterWidth,
                     height: internal.targetParentOuterHeight
                 };
+                // content_dim = getDimensions(content);
                 content_dim = {
                     width: internal.targetOuterWidth,
                     height: internal.targetOuterHeight
@@ -547,12 +601,12 @@
 
 				var delta = 1, left;
 
-				if(ev.direction === 'up' || ev.direction === 'left') {
-					ev.distance = 0 - ev.distance;
-				}
-				left = scroll_start.left + ev.distance * delta;
+                if(ev.direction === 'up' || ev.direction === 'left') {
+                    ev.distance = 0 - ev.distance;
+                }
+                left = scroll_start.left + ev.distance * delta;
                 internal.left = left;
-				content.css('left',left);
+                content.css('left',left);
 
 
             };
@@ -561,6 +615,7 @@
 
                 $target.stop(true,false);
                 that._animate($target,{left:that.computeAdjust($target)},400,function(){
+                    console.log('animate dragend');
                     that._setArrowVisibility();
                     busy = false;
                 });
@@ -619,12 +674,10 @@
                 'position':'relative',
                 'left':0
             });
-
             // init touch events if applicable
             if (options.dragEvents === true) {
                 this._dragEvents();
             }
-
             this._setArrowEvents();
             this._setUnitWidth();
             this._setTargetWidth('first load');
@@ -644,7 +697,8 @@
          * @return void
          */
         redraw: function() {
-             var that = this,
+            // console.log('redraw called');
+            var that = this,
                 internal = this.internal,
                 options = this.options,
                 $el = $(this.element);
@@ -703,11 +757,23 @@
             // too far left
             if (right < width) {
                 newLeft = left + width - right;
+
+                /*
+                console.info('=============');
+                console.log('too far right');
+                console.log('right:',right);
+                console.log('left:',left);
+                console.log(' + width:',width);
+                console.log(' - right:',right);
+                console.log('newLeft',newLeft);
+                */
+
                 left = newLeft;
             }
 
             // too far right
             if (left > 0) {
+                // console.log('too far left:',left);
                 left = newLeft = 0;
             }
 
@@ -717,9 +783,11 @@
             if (mod !== 0) {
                 if (mod < thresh) {
                     newLeft =  left - (this.internal.unitWidth + mod);
+                    //console.log('fraction shift right',newLeft);
                 }
                 if (mod > thresh) {
                     newLeft = $target.position().left - mod;
+                    //console.log('fraction shift left',newLeft);
                 }
             }
             return newLeft;
@@ -729,3 +797,6 @@
     });
 
 })( jQuery, window, document );
+
+
+
