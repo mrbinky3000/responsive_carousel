@@ -7,14 +7,17 @@ events, or both.  You can use the left and right arrows and/or use your finger
 or mouse to swipe the carousel left and right.  The code is currently is in the 
 form of a jQuery UI widget and relies on hammer.js to handle the touch events.
 
-*The carousel runs a little slow on some older Androids.  Facebook's javascript API further slows down older Androids.
+*The carousel animation runs a little slow on some older Androids that don't 
+support CSS3 transitions.  If Facebook's javascript API is also included on the 
+page it will further slow down older Androids because Facebook causes page 
+reflows every few miliseconds.
 
 ##Overhead
 
-- jQuery ~32kb
-- jQuery UI (you only need the core and widget factory) ~8kb
-- hammer.js ~2kb
-- Modernizer (you only need the "Css Transitions" option) ~2.4kb
+- 32kb : jQuery
+- 8kb : jQuery UI (you only need the core and widget factory)
+- 2kb : hammer.js
+- 2.4kb : Modernizer (you only need the "CSS3 Transitions" test)
 
 Total overhead: 44.5kb (but you're prob already using jquery, so really it's like 12.4kb)
 
@@ -30,10 +33,11 @@ timeline tool in Chrome to find and eliminate all but the most-necessary
 reflows. I also use CSS3 transitions that fall back to jQuery's default 
 $.animation() method.
 
-##Wishlist
+##To Do List
 
 - Make it so that you can choose which touch events library you want to use.  Right now it requires hammer.js, but lets say you preferr swipe.js.
-- automatic slide show.  Should be easy enough.
+- Automatic slide show option.  Should be easy enough.
+- get-able property with the currently left-most visible slide unit
 
 ##Known Bugs
 
@@ -86,7 +90,7 @@ $.animation() method.
     // set up the carousel
     $(document).ready(function(){
       $('#target')
-        .RISimpleSlider({
+        .responsiveCarousel({
             unitWidth: 'compute',
             dragEvents: Modernizer.touch,
             responsiveUnitSize: function () {
