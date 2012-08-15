@@ -117,7 +117,6 @@
                         }
                     }, speed);
                 } else {
-                    console.log('standard');
                     $this.animate(props, speed, animationOptions);
                 }
             });
