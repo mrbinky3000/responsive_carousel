@@ -32,11 +32,17 @@
             responsiveUnitSize: null,
             onRedraw: null,
             dragEvents: false,
+			speed: 400,
+			slideSpeed: 2500,
+			step: -1,
+			responsiveStep: null,
+			onShift: null, 
             cssAnimations: Modernizr.csstransitions
         },
 
         // a place to store internal vars used only by this instance of the widget
         internal: {
+			currentSlide: 0,
             left:0,
             targetWidth: 0,
             unitWidth: 0,
@@ -53,7 +59,10 @@
             targetLeft: 0,
             timer: null,
             firstMouseClick: false,
-            prefix: null
+            prefix: null, 
+			slideShowActive: false,
+			slideTimer: null,
+			slideBumped: false
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -150,7 +159,8 @@
         },
 
         /**
-         * Set the visibility of the left and right scroll arrows.
+         * Set the visibility of the left and right scroll arrows.  Also computes the number of
+		 * the left-most visible slide.
          * @private
          * @return void
          */
@@ -166,7 +176,7 @@
                 maskLeft = 0,
                 maskRight = internal.targetParentOuterWidth;
 
-
+			// right arrow
             if (currentRight <= maskRight ) {
                 $arrowRight.hide();
                 if (internal.isArrowBeingClicked === true) {
@@ -180,6 +190,7 @@
                 }
             }
 
+			// left arrow
             if (currentLeft >= maskLeft) {
                 $arrowLeft.hide();
                 if (internal.isArrowBeingClicked === true) {
@@ -192,6 +203,13 @@
                    internal.arrowLeftVisible = true;
                }
             }
+			
+			
+			// determine number of left-most visible slide
+			internal.currentSlide = Math.abs(currentLeft / internal.unitWidth);
+			if ($.isFunction(options.onShift)) {
+				options.onShift(internal.currentSlide);
+			}
 
         },
 
@@ -207,41 +225,24 @@
             }
             if (false === busy) {
                 busy = true;
-                this._animate($target,{left:this.computeAdjust($target)},400,function(){
+                this._animate($target,{left:this.computeAdjust($target)},options.speed,function(){
                     busy = false;
                 });
             }
         },
+		
+		/**
+		 * Handles when one of navigation arrows is being pressed with a finger or the mouse.
+		 * @private
+		 * @return void
+		 */
+		_doArrowBeingClicked: function(direction) {
 
-        /**
-         * Initialize the left and right arrow events.
-         * @private
-         * @return void
-         */
-        _setArrowEvents: function () {
-
-            var t,
-                that = this,
-                options = this.options,
-                internal = this.internal,
-                $target = $(this.element).find(options.target),
-                $arrowLeft = $(this.element).find(options.arrowLeft),
-                $arrowRight = $(this.element).find(options.arrowRight),
-                eventStringDown = "",
-                eventStringUp = "";
-
-
-			/* not used yet - do a mouse up event if too far left or right while pressing arrow */
-            var _checkTooFar = function($target) {
-                var i = $target.position().left;
-                return;
-            };
-
-
-            var _doArrowBeingClicked = function(direction) {
-
-
-                var currLeft = $target.position().left,
+                var that = this,
+					internal = this.internal,
+					options = this.options,
+					$target = $(this.element).find(options.target),
+					currLeft = $target.position().left,
                     parentLeftOffset = internal.targetParentMarginLeft,
                     newLeft;
 
@@ -266,25 +267,41 @@
                     }
 
                 } else {
-                    throw "unknown direction";
+                    throw new Error("unknown direction");
                 }
 
 
                 // do the animation here
                 if (options.dragEvents === true) {
                     $target.css({'left':newLeft});
-                    that._setArrowVisibility();
-                    _checkTooFar($target);
+                    this._setArrowVisibility();
                 } else {
                     busy = true;
-                    that._animate($target,{left:newLeft},400,function(){
+                    this._animate($target,{left:newLeft},options.speed,function(){
                         that._setArrowVisibility();
                         busy = false;
-                        _checkTooFar($target);
                     });
                 }
 
-            };
+            },
+
+        /**
+         * Initialize the left and right arrow events.
+         * @private
+         * @return void
+         */
+        _setArrowEvents: function () {
+
+            var t,
+                that = this,
+                options = this.options,
+                internal = this.internal,
+                $target = $(this.element).find(options.target),
+                $arrowLeft = $(this.element).find(options.arrowLeft),
+                $arrowRight = $(this.element).find(options.arrowRight),
+                eventStringDown = "",
+                eventStringUp = "";
+            
 
             // discard click on left arrow
             $arrowLeft.on('click.simpslide',function(ev){
@@ -310,7 +327,9 @@
                 ev.preventDefault();
                 if (busy === false) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
-                    internal.timer = window.setInterval(function(){_doArrowBeingClicked('left')},10);
+                    internal.timer = window.setInterval(function(){that._doArrowBeingClicked('left')},10);
+					window.clearInterval(internal.slideTimer);
+					internal.slideShowActive = false;
                 }
             });
 
@@ -319,7 +338,9 @@
             $arrowRight.on(eventStringDown,function(ev){
                 if(busy === false){
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
-                    internal.timer = window.setInterval(function(){_doArrowBeingClicked('right')},10);
+                    internal.timer = window.setInterval(function(){that._doArrowBeingClicked('right')},10);
+					window.clearInterval(internal.slideTimer);
+					internal.slideShowActive = false;
                 }
             });
 
@@ -380,6 +401,7 @@
                 w = maskInnerWidth / m;
                 w = Math.floor(w);
                 $target.find(options.unitElement).css('width',w);
+				internal.unitWidth = w;
             };
 
 
@@ -559,7 +581,7 @@
             hammer.ondragend = function(ev) {
 
                 $target.stop(true,false);
-                that._animate($target,{left:that.computeAdjust($target)},400,function(){
+                that._animate($target,{left:that.computeAdjust($target)},options.speed,function(){
                     that._setArrowVisibility();
                     busy = false;
                 });
@@ -567,19 +589,6 @@
             }
         },
 
-        /**
-         * Extend jQuery so that Animations are done using css3 animations.  If css3 is not available,
-         * fall back to standard jQuery animations.   CSS3 animations are faster.  Thanks to
-         * http://addyosmani.com/blog/css3transitions-jquery/
-         * @private
-         */
-        _initAnimate:function () {
-
-            var sliderOptions = this.options;
-
-
-
-        },
 
 
         /**
@@ -643,7 +652,7 @@
          * @return void
          */
         redraw: function() {
-             var that = this,
+            var that = this,
                 internal = this.internal,
                 options = this.options,
                 $el = $(this.element);
@@ -655,6 +664,115 @@
                 that.options.onRedraw($el, internal, options);
             }
         },
+		
+        /**
+         * return the number of the current slide.  numbering starts at zero.
+         * @public
+         * @return integer
+         */
+		getCurrentSlide: function() {
+			return this.internal.currentSlide;
+		},
+
+        /**
+         * Make a specified slide the left-most visible slide in the slider
+         * @public
+         */		
+		goToSlide: function(i) {
+            var that = this,
+                internal = this.internal,
+				options = this.options,
+				$target = $(this.element).find(options.target),
+				newLeft;
+			
+			this._setUnitWidth();
+			newLeft = i * this.internal.unitWidth * -1;
+			busy = true;
+			this._animate($target,{'left':newLeft},options.speed,function(){
+				busy = false;
+				that._setArrowVisibility();
+			});			
+						
+		},
+
+        /**
+         * Activate / Deactivate slide show mode.
+         * @public
+         */				
+		toggleSlideShow: function () {
+
+			
+			var that = this,
+				internal = this.internal,
+				options = this.options,
+				$target = $(this.element).find(options.target);
+				
+			
+			var _stopSlideShow = function() {
+				if (true === internal.slideShowActive) {
+					internal.slideShowActive = false;
+					window.clearInterval(internal.slideTimer);
+				}		
+			};
+			
+			var _step = function (i) {
+				var width = internal.targetParentInnerWidth,							
+					left = $target.position().left,
+					right = left + internal.targetWidth,
+					newLeft = left + i * internal.unitWidth,
+					newRight = right + i * internal.unitWidth,
+					adjustedLeft = newLeft;
+								
+	
+				
+				if (internal.slideBumped === false) {
+					
+					// too far left
+					if (newRight <= width) {
+						adjustedLeft = newLeft + width - newRight;
+						internal.slideBumped = 'left';
+					}
+		
+					// too far right
+					if (newLeft >= 0) {
+						internal.slideBumped = 'right';
+						adjustedLeft = 0;
+					}
+					
+				} else {
+				
+				 	if ('left' === internal.slideBumped) {
+						adjustedLeft = 0;	
+					}
+					
+					if ('right' === internal.slideBumped) {
+						adjustedLeft = left + width - right;
+					}
+					
+					internal.slideBumped = false;
+				 
+				}
+				
+				// do the animation	
+				busy = true;
+				that._animate($target,{'left':adjustedLeft},options.speed,function(){
+					busy = false;
+					that._setArrowVisibility();
+				});					
+								
+			};
+			
+			
+			if (false === internal.slideShowActive) {
+				internal.slideShowActive = true;
+				internal.slideTimer = window.setInterval(function(){
+					_step(options.step);
+				},options.slideSpeed);				
+			} else {
+				_stopSlideShow();
+			}			
+			
+		},
 
         /**
          * Destroy this plugin and clean up modifications the widget has made to the DOM
