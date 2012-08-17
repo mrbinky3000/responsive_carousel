@@ -159,7 +159,7 @@
                     easing,
                     prefix = (internal.prefix);
 
-                if (options.cssAnimations === 'sam') {
+                if (options.cssAnimations) {
                     easing = (animationOptions.easing) ? easing : 'ease-in-out';
                     $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ' + easing).css(props);
                     window.setTimeout(function () {
