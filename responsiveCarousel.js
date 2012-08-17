@@ -30,11 +30,11 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 0.2.0
- * @releaseDate 8/15/2012
+ * @version 0.2.1
+ * @releaseDate 8/17/2012
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
- * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test), hammer.js
+ * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
  */
 (function ($, window, document, undefined) {
     "use strict";

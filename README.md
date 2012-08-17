@@ -86,13 +86,13 @@ A css selector representing the immediate parent of the the target element.  Thi
 A css selector representing the child elements of target.  Usually, these are list elements.  CSS NOTE: Do not apply border, margin, or padding to these elements.
 
 ####unitWidth  (string)
-__You're going to want to set this to 'compute' on responsive sites.__   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites. 'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. See example 1 for details.
+__You're going to want to set this to 'compute' on responsive sites.__   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites. 'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. [See example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) for details.
 
 ####responsiveUnitSize  (function)
-A callback function that returns an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples for more details.
+A callback function that returns an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.
 
 ####onRedraw  (function)
-A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples.
+A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html))
 
 ####dragEvents (boolean)
 true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch
@@ -110,7 +110,7 @@ How many unitWidths to move to the left or right during a slide show.  -1 moves 
 A function that returns an integer representing the number of unitWidths to slide when the arrows are pressed.
 
 ####onShift  (function)
-A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Could for triggering other events on the page based on the current left-most visible slide.  See example 2 for this in use.
+A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Could for triggering other events on the page based on the current left-most visible slide.  [See example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) to see this in use.
 
 ####cssAnimations (boolean)
 If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
