@@ -74,30 +74,44 @@ Here are the default options:
             cssAnimations: Modernizr.csstransitions
         },
 
-arrowLeft - A css selector representing the left arrow.  Hint:  you can make this a specific anchor tag, or have several elements on a page that scroll the carousel to the left.
+####arrowLeft  (string)
+A css selector representing the left arrow.  Hint:  you can make this a specific anchor tag, or have several elements on a page that scroll the carousel to the left.
 
-arrowRight -  A css selector representing the right arrow.
+####arrowRight (string)
+A css selector representing the right arrow.
 
-target -  A css selector representing the actual DOM element that will slide behind the masking dom element.  Usually an unordered list containing list elements. This must be a child element of the carousel.
+####target (string)
+A css selector representing the actual DOM element that will slide behind the masking dom element.  Usually an unordered list containing list elements. This must be a child element of the carousel.
 
-mask -  A css selector representing the immediate parent of the the target element.  This element is set to overflow hidden and helps us give the illusion of a horizontal scroll. This must be a child element of the carousel.
+####mask (string)
+A css selector representing the immediate parent of the the target element.  This element is set to overflow hidden and helps us give the illusion of a horizontal scroll. This must be a child element of the carousel.
 
-unitElement -  Child elements of target.  Usually, these are list elements.  CSS NOTE: Do not apply border, margin, or padding to these elements.
+####unitElement  (string)
+A css selector representing the child elements of target.  Usually, these are list elements.  CSS NOTE: Do not apply border, margin, or padding to these elements.
 
-unitWidth - You're going to want to set this to 'compute' on responsive sites.   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites.
+####unitWidth  (string)
+You're going to want to set this to 'compute' on responsive sites.   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites.
 
-responsiveUnitSize - A callback function that returns an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples for more details.
+####responsiveUnitSize  (function)
+A callback function that returns an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples for more details.
 
-onRedraw - A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples.
+####onRedraw  (function)
+A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples.
 
-dragEvents - true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch
+####dragEvents (boolean)
+true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch
 
-speed - Number milliseconds it takes to scroll one unitWidth to the left or right when you click on an arrow or during the slide show.
+####speed   (integer)
+Number milliseconds it takes to scroll one unitWidth to the left or right when you click on an arrow or during the slide show.
 
-slideSpeed - Number of milliseconds to pause on each slide in a slideshow.
+####slideSpeed  (integer)
+Number of milliseconds to pause on each slide in a slideshow.
 
-step - How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
+####step (integer)
+How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
 
-onShift - A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Could for triggering other events on the page based on the current left-most visible slide.  See example 2 for this in use.
+####onShift  (function)
+A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Could for triggering other events on the page based on the current left-most visible slide.  See example 2 for this in use.
 
-cssAnimations -  If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
+####cssAnimations (boolean)
+If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
