@@ -45,13 +45,6 @@ $.animation() method.
 - Sometimes arrows become un responsive if you press them in rapid succession on iPads / iPhones.  A quick swipe with your finger seems to make the arrows respond again.
 - Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is contantly causing the broswer to do a reflow every few milliseconds.
 
-
-
-##How To Use
-
-1) need to supply a small, simple function that returns an integer with the number of elements you want in the carousel.  Your callback function can poll the size of the current window, or any other dom element, and then make a decision.  
-
-
 ##Config Options
 
 Here are the default options:
@@ -90,7 +83,7 @@ A css selector representing the immediate parent of the the target element.  Thi
 A css selector representing the child elements of target.  Usually, these are list elements.  CSS NOTE: Do not apply border, margin, or padding to these elements.
 
 ####unitWidth  (string)
-You're going to want to set this to 'compute' on responsive sites.   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites.
+__You're going to want to set this to 'compute' on responsive sites.__   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites. 'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. See example 1 for details.
 
 ####responsiveUnitSize  (function)
 A callback function that returns an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples for more details.
@@ -109,6 +102,9 @@ Number of milliseconds to pause on each slide in a slideshow.
 
 ####step (integer)
 How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
+
+####responsiveStep (function)
+A function that returns an integer representing the number of unitWidths to slide when the arrows are pressed.
 
 ####onShift  (function)
 A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Could for triggering other events on the page based on the current left-most visible slide.  See example 2 for this in use.
