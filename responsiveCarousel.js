@@ -126,56 +126,46 @@
         },
 
 
+
         /**
          * A proxy function that should be called to animate stuff instead of using jQuery's $.animate() function.
          * If the user's browser supports CSS3 Transitions, we use them since they are faster.  If they don't support
          * Transitions, we jQuery's default $.animate() method which is fast on newer computers, but slower on some
          * under-powered mobile devices.  $.animate() also causes page reflows, which we are trying to avoid.
          *
-         * @todo CLEAN THIS UP!!!!  Copied from other sites on the web and hacked by me to fix a bug.  This is way
-         * too convoluted.  Make it nicer.
+         * TODO:  make this support more than one type of easing.
          *
          * @param $target
-         * @param props
-         * @param speed
-         * @param easing
-         * @param callback
-         * @return {*}
+         * @param props object The css attributes to animate
+         * @param speed integer Speed in milliseconds
+         * @param callback function A function to call after the animateion is done
+         * @return {*} This is chainable.
          * @private
          */
-        _animate: function ($target, props, speed, easing, callback) {
+        _animate: function ($target, props, speed, callback) {
             var options = this.options,
-                internal = this.internal,
-                animationOptions = (speed && typeof speed === "object") ? $.extend({}, speed) : {
-                    complete: callback || (!callback && easing) || ($.isFunction(speed) && speed),
-                    duration: speed,
-                    easing: (callback && easing) || easing && !$.isFunction(easing) && easing
-                };
+                internal = this.internal;
 
 
 
             return $target.each(function () {
                 var $this = $(this),
-                    easing,
                     prefix = (internal.prefix);
 
                 if (options.cssAnimations) {
-                    easing = (animationOptions.easing) ? easing : 'ease-in-out';
-                    $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ' + easing).css(props);
+                    $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ease-in-out').css(props);
                     window.setTimeout(function () {
                         $this.css(prefix + 'transition', '');
-                        if ($.isFunction(animationOptions.complete)) {
-                            animationOptions.complete();
+                        if ($.isFunction(callback)) {
+                            callback();
                         }
                     }, speed);
                 } else {
-                    animationOptions.easing = 'linear';
-                    $this.animate(props, speed, easing, function(){
-                        if ($.isFunction(animationOptions.complete)) {
-                            animationOptions.complete();
+                    $this.animate(props, speed, function() {
+                        if ($.isFunction(callback)) {
+                            callback();
                         }
                     });
-                    //$this.animate(props, speed, animationOptions);  // this is the original one, that never worked.
                 }
             });
         },
@@ -205,6 +195,9 @@
             internal.targetParentInnerWidth = $target.parent().innerWidth();
             internal.targetParentOuterHeight = $target.parent().outerHeight();
             internal.targetParentMarginLeft = parseInt($target.parents().css('marginLeft'), 10);
+            if (isNaN(internal.targetParentMarginLeft)) {
+                internal.targetParentMarginLeft = 0;
+            }
         },
 
         /**
@@ -299,7 +292,9 @@
                 return;
             }
 
-            if ('left' === direction) {
+
+
+            if (direction === "left") {
 
                 if (options.dragEvents === true) {
                     newLeft =  currLeft - parentLeftOffset + 10;
@@ -307,7 +302,7 @@
                     newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
                 }
 
-            } else if ('right' === direction) {
+            } else if (direction === "right") {
 
                 if (options.dragEvents === true) {
                     newLeft =  currLeft - parentLeftOffset - 10;
@@ -345,7 +340,6 @@
                 that = this,
                 options = this.options,
                 internal = this.internal,
-                $target = $(this.element).find(options.target),
                 $arrowLeft = $(this.element).find(options.arrowLeft),
                 $arrowRight = $(this.element).find(options.arrowRight),
                 eventStringDown = "",
@@ -387,14 +381,14 @@
 
             // right arrow, move right
             $arrowRight.on(eventStringDown, function () {
+
                 if (busy === false) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
-                    internal.timer = window.setInterval(function () { that._doArrowBeingClicked('right'); }, 10);
+                    internal.timer = window.setInterval(function() {that._doArrowBeingClicked('right'); }, 10);
 					if (internal.slideTimer) {
                         window.clearInterval(internal.slideTimer);
     					internal.slideShowActive = false;
                     }
-
                 }
             });
 
@@ -553,8 +547,8 @@
         },
 
         /**
-         * Handle optional drag events.  Works on touch and non-touch screens via mouse.  Recommended to only
-         * enable this option for touch screens.
+         * Handle optional drag events.  Works on touch and non-touch screens via mouse drag.
+         *
          * @param jQuery container The object (usually a UL) that contains the elements that scroll, (usually LI's)
          * @private
          * @return void
@@ -577,7 +571,6 @@
                     tap_double: false,
                     hold: false
                 }),
-                dragWait = new this.wait(),
                 scroll_start = {},
                 scroll_dim = {},
                 content_dim = {},
