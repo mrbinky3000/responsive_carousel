@@ -7,8 +7,8 @@ or mouse to swipe the carousel left and right.  The code is currently is in the
 form of a jQuery UI widget and relies on hammer.js to handle the touch events.
 
 See it in Action:
-- [Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) A simulated product shelf.  The number and size of the boxes change based on the width of the window.
-- [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) A simulated hero slide show.  There is only one unit visible at a time.  Uses callbacks to add more functionality to the slideshow.
+- [Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) : A simulated product shelf.  The number and size of the boxes change based on the width of the window.
+- [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) : A simulated hero slide show.  There is only one unit visible at a time.  Uses callbacks to add more functionality to the slideshow.
 
 *The carousel animation runs a little slow on some older Androids that don't 
 support CSS3 transitions.  If Facebook's javascript API is also included on the 

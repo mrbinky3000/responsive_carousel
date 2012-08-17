@@ -102,6 +102,23 @@
         },
 
 
+        /**
+         * A proxy function that should be called to animate stuff instead of using jQuery's $.animate() function.
+         * If the user's browser supports CSS3 Transitions, we use them since they are faster.  If they don't support
+         * Transitions, we jQuery's default $.animate() method which is fast on newer computers, but slower on some
+         * under-powered mobile devices.  $.animate() also causes page reflows, which we are trying to avoid.
+         *
+         * @todo CLEAN THIS UP!!!!  Copied from other sites on the web and hacked by me to fix a bug.  This is way
+         * too convoluted.  Make it nicer.
+         *
+         * @param $target
+         * @param props
+         * @param speed
+         * @param easing
+         * @param callback
+         * @return {*}
+         * @private
+         */
         _animate: function ($target, props, speed, easing, callback) {
             var options = this.options,
                 internal = this.internal,
@@ -112,13 +129,15 @@
                 };
 
 
+
             return $target.each(function () {
                 var $this = $(this),
-                    easing = (animationOptions.easing) ? easing : 'ease-in-out',
+                    easing,
                     prefix = (internal.prefix);
 
                 if (options.cssAnimations) {
-                    $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ease-in-out').css(props);
+                    easing = (animationOptions.easing) ? easing : 'ease-in-out'
+                    $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ' + easing).css(props);
                     setTimeout(function () {
                         $this.css(prefix + 'transition', '');
                         if ($.isFunction(animationOptions.complete)) {
@@ -126,7 +145,9 @@
                         }
                     }, speed);
                 } else {
-                    $this.animate(props, speed, animationOptions);
+                    animationOptions.easing = 'linear';
+                    $this.animate(props,speed,easing,callback);
+                    //$this.animate(props, speed, animationOptions);  // this is the original one, that never worked.
                 }
             });
         },
@@ -813,8 +834,6 @@
             left = $target.position().left;
             right = left + this.internal.targetWidth;
             thresh = this.internal.unitWidth / -2;
-
-
 
 
             // too far left
