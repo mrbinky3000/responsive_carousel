@@ -111,10 +111,11 @@
                 pref = "",
                 len = prefixes.length;
 
-            while (len -= 1) {
+            while (len > -1) {
                 if ((prefixes[len] + upper) in elem.style) {
                     pref = (prefixes[len]);
                 }
+                len = len - 1;
             }
 
             if (prop in elem.style) {

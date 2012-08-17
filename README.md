@@ -15,6 +15,15 @@ support CSS3 transitions.  If Facebook's javascript API is also included on the
 page it will further slow down older Androids because Facebook causes page 
 reflows every few miliseconds.
 
+##Supported Browsers
+Please help me out by testing on other browsers so I can add to the support list. I have tested this on the following browsers:
+- IE7 and higher
+- Chrome 21 and higher
+- Safari 5.1.7 and higher
+- FireFox 14 and higher
+- iPhone / iPad (safari)
+- Android Browser (~Chrome 12)
+
 ##Overhead
 
 - 32kb : jQuery
