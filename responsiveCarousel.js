@@ -159,7 +159,7 @@
                     easing,
                     prefix = (internal.prefix);
 
-                if (options.cssAnimations) {
+                if (options.cssAnimations === 'sam') {
                     easing = (animationOptions.easing) ? easing : 'ease-in-out';
                     $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ' + easing).css(props);
                     window.setTimeout(function () {
@@ -170,7 +170,11 @@
                     }, speed);
                 } else {
                     animationOptions.easing = 'linear';
-                    $this.animate(props, speed, easing, callback);
+                    $this.animate(props, speed, easing, function(){
+                        if ($.isFunction(animationOptions.complete)) {
+                            animationOptions.complete();
+                        }
+                    });
                     //$this.animate(props, speed, animationOptions);  // this is the original one, that never worked.
                 }
             });
@@ -373,8 +377,10 @@
                 if (busy === false) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () {that._doArrowBeingClicked('left'); }, 10);
-					window.clearInterval(internal.slideTimer);
-					internal.slideShowActive = false;
+                    if (internal.slideTimer) {
+                       window.clearInterval(internal.slideTimer);
+                       internal.slideShowActive = false;
+                    }
                 }
             });
 
@@ -384,8 +390,11 @@
                 if (busy === false) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () { that._doArrowBeingClicked('right'); }, 10);
-					window.clearInterval(internal.slideTimer);
-					internal.slideShowActive = false;
+					if (internal.slideTimer) {
+                        window.clearInterval(internal.slideTimer);
+    					internal.slideShowActive = false;
+                    }
+
                 }
             });
 
