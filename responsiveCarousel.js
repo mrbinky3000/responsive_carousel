@@ -1,5 +1,26 @@
 /*jslint nomen: true, browser: true */
 /*global Modernizr, Hammer, jQuery */
+/*properties
+    Widget, _animate, _clearInterval, _create, _doArrowBeingClicked, _dragEvents,
+    _getPrefix, _setArrowEvents, _setArrowVisibility, _setTargetWidth,
+    _setUnitWidth, abs, animate, arrowLeft, arrowLeftVisible, arrowRight,
+    arrowRightVisible, call, charAt, clearInterval, clearTimeout, complete,
+    computeAdjust, createElement, css, cssAnimations, csstransitions,
+    currentSlide, destroy, direction, distance, drag, dragEvents,
+    drag_horizontal, drag_min_distance, drag_vertical, duration, each, easing,
+    element, eq, extend, find, firstMouseClick, floor, get, getCurrentSlide,
+    getTime, goToSlide, height, hide, hold, innerWidth, internal,
+    isArrowBeingClicked, isFunction, left, length, mask, on, onRedraw, onShift,
+    ondrag, ondragend, ondragstart, options, outerHeight, outerWidth, parent,
+    parents, position, prefix, preventDefault, prototype, redraw, responsiveStep,
+    responsiveUnitSize, setInterval, setTimeout, show, slice, slideBumped,
+    slideShowActive, slideSpeed, slideTimer, speed, step, stop, style, tap,
+    tap_double, target, targetBackupCopy, targetLeft, targetOuterHeight,
+    targetOuterWidth, targetParentInnerWidth, targetParentMarginLeft,
+    targetParentOuterHeight, targetParentOuterWidth, targetWidth, thenDo, time,
+    timer, toLowerCase, toUpperCase, toggleSlideShow, top, transform, unbind,
+    unitElement, unitWidth, wait, widget, width
+*/
 /*!
  * responsiveCarousel
  * A responsive carousel that works in desktop browsers, ipad, iphone, and even
@@ -601,7 +622,7 @@
 
             };
 
-            hammer.ondragend = function (ev) {
+            hammer.ondragend = function () {
 
                 $target.stop(true, false);
                 that._animate($target, {left: that.computeAdjust($target)}, options.speed, function () {
