@@ -30,7 +30,7 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @releaseDate 8/17/2012
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
@@ -296,37 +296,20 @@
 
 
             if (direction === "left") {
-
-                if (options.dragEvents === true) {
-                    newLeft =  currLeft - parentLeftOffset + 10;
-                } else {
-                    newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
-                }
-
+                newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
             } else if (direction === "right") {
-
-                if (options.dragEvents === true) {
-                    newLeft =  currLeft - parentLeftOffset - 10;
-                } else {
-                    newLeft =  currLeft - parentLeftOffset - internal.unitWidth;
-                }
-
+                newLeft =  currLeft - parentLeftOffset - internal.unitWidth;
             } else {
                 throw new Error("unknown direction");
             }
 
 
             // do the animation here
-            if (options.dragEvents === true) {
-                $target.css({'left': newLeft});
-                this._setArrowVisibility();
-            } else {
-                busy = true;
-                this._animate($target, {left: newLeft}, options.speed, function () {
-                    that._setArrowVisibility();
-                    busy = false;
-                });
-            }
+            busy = true;
+            this._animate($target, {left: newLeft}, options.speed, function () {
+                that._setArrowVisibility();
+                busy = false;
+            });
 
         },
 
