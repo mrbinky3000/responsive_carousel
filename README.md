@@ -48,8 +48,9 @@ $.animation() method.
 ##To Do List
 
 - Make it so that you can choose which touch events library you want to use.  Right now it requires hammer.js, but lets say you preferr swipe.js.
-- Automatic slide show option.  Should be easy enough.
-- get-able property with the currently left-most visible slide unit
+- ~~Automatic slide show option.  Should be easy enough.~~ DONE!
+- ~~get-able property with the currently left-most visible slide unit~~ DONE!
+- Infinite scroll / slide show
 
 ##Known Bugs
 
