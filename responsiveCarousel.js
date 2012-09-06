@@ -852,7 +852,7 @@
 
             var internal = this.internal,
                 left = $target.position().left,
-                right = left + internal.targetWidth,
+                right,
                 mod,
                 thresh = internal.unitWidth / -2,
                 width = internal.targetParentInnerWidth,
@@ -873,6 +873,7 @@
             }
 
             // entire slider is too far left
+            right = left + internal.targetWidth;
             if (right < width) {
                 newLeft = left + width - right;
                 left = newLeft;
