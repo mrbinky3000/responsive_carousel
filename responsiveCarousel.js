@@ -4,22 +4,23 @@
     Widget, _animate, _clearInterval, _create, _doArrowBeingClicked, _dragEvents,
     _getPrefix, _setArrowEvents, _setArrowVisibility, _setTargetWidth,
     _setUnitWidth, abs, animate, arrowLeft, arrowLeftVisible, arrowRight,
-    arrowRightVisible, call, charAt, clearInterval, clearTimeout, complete,
+    arrowRightVisible, attr, call, charAt, clearInterval, clearTimeout,
     computeAdjust, createElement, css, cssAnimations, csstransitions,
-    currentSlide, destroy, direction, distance, drag, dragEvents,
-    drag_horizontal, drag_min_distance, drag_vertical, duration, each, easing,
-    element, eq, extend, find, firstMouseClick, floor, get, getCurrentSlide,
-    getTime, goToSlide, height, hide, hold, innerWidth, internal,
-    isArrowBeingClicked, isFunction, left, length, mask, on, onRedraw, onShift,
-    ondrag, ondragend, ondragstart, options, outerHeight, outerWidth, parent,
-    parents, position, prefix, preventDefault, prototype, redraw, responsiveStep,
-    responsiveUnitSize, setInterval, setTimeout, show, slice, slideBumped,
-    slideShowActive, slideSpeed, slideTimer, speed, step, stop, style, tap,
-    tap_double, target, targetBackupCopy, targetLeft, targetOuterHeight,
-    targetOuterWidth, targetParentInnerWidth, targetParentMarginLeft,
-    targetParentOuterHeight, targetParentOuterWidth, targetWidth, thenDo, time,
-    timer, toLowerCase, toUpperCase, toggleSlideShow, top, transform, unbind,
-    unitElement, unitWidth, wait, widget, width
+    currentSlide, data, 'data-slide', destroy, direction, distance, drag,
+    dragEvents, drag_horizontal, drag_min_distance, drag_vertical, each, element,
+    eq, find, firstMouseClick, floor, get, getCurrentSlide, getTime, goToSlide,
+    hasOwnProperty, height, hide, hold, innerWidth, internal,
+    isArrowBeingClicked, isFunction, left, length, mask, nudgeDirection,
+    nudgeThreshold, on, onRedraw, onShift, ondrag, ondragend, ondragstart,
+    options, outerHeight, outerWidth, parent, parents, position, prefix,
+    preventDefault, prototype, redraw, responsiveStep, responsiveUnitSize,
+    setInterval, setTimeout, show, slice, slideBumped, slideShowActive,
+    slideSpeed, slideTimer, speed, step, stop, style, tap, tap_double, target,
+    targetBackupCopy, targetLeft, targetOuterHeight, targetOuterWidth,
+    targetParentInnerWidth, targetParentMarginLeft, targetParentOuterHeight,
+    targetParentOuterWidth, targetWidth, thenDo, time, timer, toLowerCase,
+    toUpperCase, toggleSlideShow, top, transform, unbind, unitElement, unitWidth,
+    wait, widget, width
 */
 /*!
  * responsiveCarousel
@@ -30,13 +31,13 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 0.2.2
- * @releaseDate 8/17/2012
+ * @version 0.3.0
+ * @releaseDate 9/6/2012
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
  * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
  */
-(function ($, window, document, undefined) {
+(function ($, window, document) {
     "use strict";
     var busy = false;
 
@@ -60,7 +61,8 @@
 			step: -1,
 			responsiveStep: null,
 		    onShift: null,
-            cssAnimations: Modernizr.csstransitions
+            cssAnimations: Modernizr.csstransitions,
+            nudgeThreshold: 10
         },
 
         // a place to store internal vars used only by this instance of the widget
@@ -85,7 +87,8 @@
             prefix: null,
 			slideShowActive: false,
 			slideTimer: null,
-			slideBumped: false
+			slideBumped: false,
+            nudgeDirection: null
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -112,13 +115,13 @@
                 len = prefixes.length;
 
             while (len > -1) {
-                if ((prefixes[len] + upper) in elem.style) {
+                if (elem.style.hasOwnProperty(prefixes[len] + upper)) {
                     pref = (prefixes[len]);
                 }
                 len = len - 1;
             }
 
-            if (prop in elem.style) {
+            if (elem.style.hasOwnProperty(prop)) {
                 pref = (prop);
             }
 
@@ -162,7 +165,7 @@
                         }
                     }, speed);
                 } else {
-                    $this.animate(props, speed, function() {
+                    $this.animate(props, speed, function () {
                         if ($.isFunction(callback)) {
                             callback();
                         }
@@ -187,6 +190,8 @@
                 options = this.options,
                 $el = $(this.element),
                 $target = $(this.element).find(options.target);
+
+            caller = ' ' + caller; // shut up jsLint
 
             internal.targetWidth =  $target.find(options.unitElement).length * internal.unitWidth;
             $el.find(options.target).width(internal.targetWidth);
@@ -249,7 +254,7 @@
 
 
 			// determine number of left-most visible slide
-			internal.currentSlide = Math.abs(currentLeft / internal.unitWidth);
+			internal.currentSlide = $($target.find(options.unitElement)[Math.abs(currentLeft / internal.unitWidth)]).data('slide');
 			if ($.isFunction(options.onShift)) {
 				options.onShift(internal.currentSlide);
 			}
@@ -320,8 +325,7 @@
          */
         _setArrowEvents: function () {
 
-            var t,
-                that = this,
+            var that = this,
                 options = this.options,
                 internal = this.internal,
                 $arrowLeft = $(this.element).find(options.arrowLeft),
@@ -331,22 +335,22 @@
 
 
             // discard click on left arrow
-            $arrowLeft.on('click.simpslide', function (ev) {
+            $arrowLeft.on('click.responsiveCarousel', function (ev) {
                 ev.preventDefault();
             });
 
             // discard click on right arrow
-            $arrowRight.on('click.simpslide', function (ev) {
+            $arrowRight.on('click.responsiveCarousel', function (ev) {
                 ev.preventDefault();
             });
 
             // type of events depend on touch or not.
             if (options.dragEvents === true) {
-                eventStringDown = 'mousedown.simpslide touchstart.simpslide';
-                eventStringUp = 'mouseup.simpslide touchend.simpslide';
+                eventStringDown = 'mousedown.responsiveCarousel touchstart.responsiveCarousel';
+                eventStringUp = 'mouseup.responsiveCarousel touchend.responsiveCarousel';
             } else {
-                eventStringDown = 'mousedown.simpslide';
-                eventStringUp = 'mouseup.simpslide';
+                eventStringDown = 'mousedown.responsiveCarousel';
+                eventStringUp = 'mouseup.responsiveCarousel';
             }
 
             // left arrow, move left
@@ -356,8 +360,8 @@
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () {that._doArrowBeingClicked('left'); }, 10);
                     if (internal.slideTimer) {
-                       window.clearInterval(internal.slideTimer);
-                       internal.slideShowActive = false;
+                        window.clearInterval(internal.slideTimer);
+                        internal.slideShowActive = false;
                     }
                 }
             });
@@ -368,10 +372,10 @@
 
                 if (busy === false) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
-                    internal.timer = window.setInterval(function() {that._doArrowBeingClicked('right'); }, 10);
+                    internal.timer = window.setInterval(function () {that._doArrowBeingClicked('right'); }, 10);
 					if (internal.slideTimer) {
                         window.clearInterval(internal.slideTimer);
-    					internal.slideShowActive = false;
+                        internal.slideShowActive = false;
                     }
                 }
             });
@@ -448,7 +452,7 @@
                 // can cause the widths to change as the page is updated. To counter
                 // this, we'll re-run _importWidthFromDom after each image load in the
                 // target or it's child elements.
-                $target.find('img').on('load.simpslide', function () {
+                $target.find('img').on('load.responsiveCarousel', function () {
                     // fire the responsiveUnitSize callback
                     _importWidthFromDOM();
                     that._setTargetWidth('inherit');
@@ -492,7 +496,7 @@
 
 
                 // re-import the width every time the page is re-sized.
-                $(window).on('resize.simpslide', function () {
+                $(window).on('resize.responsiveCarousel', function () {
                     delay.thenDo(function () {
                         var adjust;
 
@@ -505,11 +509,9 @@
                         _importWidthFromDOM();
                         that._setTargetWidth('compute (window resize)');
 
-                        // keep the left-most fully visible object (not partially hidden)
-                        // aligned with the left of the container.  No fractional units
-                        // allowed on the left. (Which means there should not be any
-                        // fractional units on the right either, if all goes well)
-                        adjust = that.computeAdjust($target);
+                        // keep the left-most fully visible object prior to the resize
+                        // in the left-most slot after the resize
+                        adjust = internal.currentSlide * -1 * internal.unitWidth;
 
 
                         // if we are not animating a transition, update the scroll arrows
@@ -598,25 +600,33 @@
 
 				var delta = 1, left;
 
+                internal.nudgeDirection = null;
+
 				if (ev.direction === 'up' || ev.direction === 'left') {
-					ev.distance = 0 - ev.distance;
-				}
-				left = scroll_start.left + ev.distance * delta;
+					ev.distance = -ev.distance;
+                    if (Math.abs(ev.distance) > options.nudgeThreshold && Math.abs(ev.distance) < internal.unitWidth / 2) {
+                        internal.nudgeDirection = 'left';
+                    }
+				} else {
+                    if (ev.distance > options.nudgeThreshold && ev.distance < internal.unitWidth / 2) {
+                        internal.nudgeDirection = 'right';
+                    }
+                }
+
+                left = scroll_start.left + ev.distance * delta;
                 internal.left = left;
 				content.css('left', left);
-
 
             };
 
             hammer.ondragend = function () {
-
                 $target.stop(true, false);
                 that._animate($target, {left: that.computeAdjust($target)}, options.speed, function () {
                     that._setArrowVisibility();
                     busy = false;
                 });
-
             };
+
         },
 
 
@@ -656,6 +666,11 @@
             $target.css({
                 'position': 'relative',
                 'left': 0
+            });
+
+            //number all the unitElements
+            $target.find(options.unitElement).each(function (i) {
+                $(this).attr({"data-slide": i});
             });
 
             // init touch events if applicable
@@ -716,7 +731,7 @@
 				newLeft;
 
 			this._setUnitWidth();
-			newLeft = i * this.internal.unitWidth * -1;
+			newLeft = i * internal.unitWidth * -1;
 			busy = true;
 			this._animate($target, {'left': newLeft}, options.speed, function () {
 				busy = false;
@@ -812,9 +827,9 @@
         destroy: function () {
 
             // remove events created by this instance
-            $(window).unbind('.simpslide');
-            $(this.element).find(this.options.arrowLeft).unbind('.simpslide');
-            $(this.element).find(this.options.arrowRight).unbind('.simpslide');
+            $(window).unbind('.responsiveCarousel');
+            $(this.element).find(this.options.arrowLeft).unbind('.responsiveCarousel');
+            $(this.element).find(this.options.arrowRight).unbind('.responsiveCarousel');
 
             // restore the element to it's original pristine state
             this.element = this.internal.targetBackupCopy;
@@ -835,38 +850,55 @@
         computeAdjust : function ($target) {
 
 
-            var left, right, mod, thresh, width, newLeft;
+            var internal = this.internal,
+                left = $target.position().left,
+                right = left + internal.targetWidth,
+                mod,
+                thresh = internal.unitWidth / -2,
+                width = internal.targetParentInnerWidth,
+                newLeft,
+                direction = internal.nudgeDirection,
+                unitWidth = internal.unitWidth;
 
 
+            // nudged with finger or mouse past the threshold level
+            if (direction !== null) {
+                if (direction === 'left') {
+                    newLeft = left - unitWidth;
+                }
+                if (direction === 'right') {
+                    newLeft = left + unitWidth;
+                }
+                left = newLeft;
+            }
 
-            width = this.internal.targetParentInnerWidth;
-            left = $target.position().left;
-            right = left + this.internal.targetWidth;
-            thresh = this.internal.unitWidth / -2;
-
-
-            // too far left
+            // entire slider is too far left
             if (right < width) {
                 newLeft = left + width - right;
                 left = newLeft;
             }
 
-            // too far right
+            // entire slider is too far right
             if (left > 0) {
                 left = newLeft = 0;
             }
 
 
             // keep left most fully visible object aligned with left border
+
             mod = left % this.internal.unitWidth;
+
             if (mod !== 0) {
+
                 if (mod < thresh) {
                     newLeft =  left - (this.internal.unitWidth + mod);
                 }
                 if (mod > thresh) {
-                    newLeft = $target.position().left - mod;
+                    newLeft = left - mod;
                 }
             }
+
+            // compute the number of the left-most slide and store the number of the left-most slide
             return newLeft;
         }
 

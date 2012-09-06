@@ -4,6 +4,25 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 <title>responsiveCarosel Example - 2</title>
+<script>
+    /* This is not part of the example!  It's here so I can track any javascript errors that you may encounter and then
+     * fix them.
+     */
+    var _errs = ["502e436e58493efb3d0035e8"];
+    (function (a, b) {
+        a.onerror = function () {
+            _errs.push(arguments)
+        };
+        var d = function () {
+            var a = b.createElement("script"), c = b.getElementsByTagName("script")[0];
+            a.src = "//d15qhc0lu1ghnk.cloudfront.net/beacon.js";
+            a.async = !0;
+            c.parentNode.insertBefore(a, c)
+        };
+        a.addEventListener ? a.addEventListener("load", d, !1) :
+                a.attachEvent("onload", d)
+    })(window, document);
+</script>
 <script src="lib/modernizr.min.js" type="text/javascript"></script>
 <style type="text/css">
 
@@ -189,11 +208,38 @@ it with your own stuff.  */
 	margin-right: 10px;
 }
 
+#menu span {
+    white-space: nowrap;
+}
+
 </style>
+<script type="text/javascript">
+  /* This is Google Tracking code and not part of the demo.  I just want to see which browsers check out this demo
+   * the most so I can know where to focus my efforts.
+   */
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-34099668-1']);
+  _gaq.push(['_setDomainName', 'matthewtoledo.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 <body>
 <h1>Example 2</h1>
+
 <p>A hero carousel.  Something that might be on a product landing page.</p>
+
+<p id="menu">
+    <span>[ <a href="https://github.com/mrbinky3000/responsive_carousel">Github</a> ]</span>
+    <span>[ <a href="example-1.html">Example 1</a> ]</span>
+</p>
+
 <div class="kill-long-press examples" id="example-2">
 	<div class="slider">
 		<div class="slider-mask-wrap">

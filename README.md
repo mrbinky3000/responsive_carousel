@@ -47,7 +47,7 @@ $.animation() method.
 
 ##To Do List
 
-- Make it so that you can choose which touch events library you want to use.  Right now it requires hammer.js, but lets say you preferr swipe.js.
+- Make it so that you can choose which touch events library you want to use.  Right now it requires hammer.js, but lets say you prefer swipe.js.
 - Automatic slide show option.  Should be easy enough.
 - get-able property with the currently left-most visible slide unit
 
@@ -55,7 +55,7 @@ $.animation() method.
 
 - Things get weird if a user touches both the left and right scroll arrows at the same time.
 - Sometimes arrows become un responsive if you press them in rapid succession on iPads / iPhones.  A quick swipe with your finger seems to make the arrows respond again.
-- Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is contantly causing the broswer to do a reflow every few milliseconds.
+- Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is constantly causing the browser to do a repaint every few milliseconds.
 
 ##Config Options
 
@@ -75,8 +75,9 @@ Here are the default options:
 			slideSpeed: 2500,
 			step: -1,
 			responsiveStep: null,
-			onShift: null,
-            cssAnimations: Modernizr.csstransitions
+		    onShift: null,
+            cssAnimations: Modernizr.csstransitions,
+            nudgeThreshold: 10
         },
 
 ####arrowLeft  (string)
@@ -123,3 +124,13 @@ A callback function that is triggered after the carousel is moved to the left or
 
 ####cssAnimations (boolean)
 If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
+
+####nudgeThreshold (integer)
+The minimum amount of pixels the user must drag the target before we force a slide one unit to the left or right.
+
+
+##Change Log
+
+#### Version 0.3.0 - 9/6/2012
+- Added "nudgeThreshold" option so people can slide to the next slide with a little flick instead of dragging half the distance of the entire slide.  I think this improves the user experience.
+- Updated example 1 so that people can use their mouse to drag the carousel on non-touch screens.
