@@ -27,7 +27,7 @@
  * A responsive carousel that works in desktop browsers, ipad, iphone, and even
  * most Androids.  It uses css3 animations with a jquery animation fallback for
  * greater speed.  The code was optimized to minimize page reflows to further
- * enhance the overall speed.
+ * enhance the overall speed..
  *
  * This is a jQuery UI Widget
  *
