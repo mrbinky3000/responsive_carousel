@@ -62,7 +62,8 @@
 			responsiveStep: null,
 		    onShift: null,
             cssAnimations: Modernizr.csstransitions,
-            nudgeThreshold: 10
+            nudgeThreshold: 10,
+            infinite: true
         },
 
         // a place to store internal vars used only by this instance of the widget
@@ -89,7 +90,7 @@
 			slideTimer: null,
 			slideBumped: false,
             nudgeDirection: null,
-            infinite: true  // not used yet. just a placeholder.
+            infinite: false  // not used yet. just a placeholder.
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -440,6 +441,7 @@
                     $target.find(options.unitElement).css('width', w);
                     internal.unitWidth = w;
                     // if we have infinite scrolling, add clones to the front and back of our our list.
+
                 };
 
 
