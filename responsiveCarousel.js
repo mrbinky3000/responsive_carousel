@@ -89,7 +89,7 @@
 			slideTimer: null,
 			slideBumped: false,
             nudgeDirection: null,
-            infinite: true
+            infinite: true  // not used yet. just a placeholder.
         },
 
         // Execute a callback only after a series of events are done being triggered.
