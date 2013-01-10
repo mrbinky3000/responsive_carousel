@@ -50,7 +50,7 @@ $.animation() method.
 - Make it so that you can choose which touch events library you want to use.  Right now it requires hammer.js, but lets say you preferr swipe.js.
 - ~~Automatic slide show option.  Should be easy enough.~~ DONE!
 - ~~get-able property with the currently left-most visible slide unit~~ DONE!
-- Infinite scroll / slide show
+- Infinite scroll / slide show  (Buggy beta version available in experimental branch.  Will most likely re-write infinite scroll with new approach.)
 
 ##Known Bugs
 
@@ -132,6 +132,7 @@ The minimum amount of pixels the user must drag the target before we force a sli
 
 ##Change Log
 
-#### Version 0.3.0 - 9/6/2012
+#### Version 0.4.0 - 1/10/2013
+- Bugfix. Script to determine vendor prefix for CSS transitions were not working on Firefox.  Switched to a new method.
 - Added "nudgeThreshold" option so people can slide to the next slide with a little flick instead of dragging half the distance of the entire slide.  I think this improves the user experience.
 - Updated example 1 so that people can use their mouse to drag the carousel on non-touch screens.

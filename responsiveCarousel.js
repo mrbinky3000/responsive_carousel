@@ -88,7 +88,8 @@
 			slideShowActive: false,
 			slideTimer: null,
 			slideBumped: false,
-            nudgeDirection: null
+            nudgeDirection: null,
+            infinite: true
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -115,13 +116,13 @@
                 len = prefixes.length;
 
             while (len > -1) {
-                if (elem.style.hasOwnProperty(prefixes[len] + upper)) {
+                if (typeof elem.style[prefixes[len] + upper] !== 'undefined') {
                     pref = (prefixes[len]);
                 }
                 len = len - 1;
             }
 
-            if (elem.style.hasOwnProperty(prop)) {
+            if (elem.style[prop]) {
                 pref = (prop);
             }
 
@@ -438,6 +439,7 @@
                     w = Math.floor(w);
                     $target.find(options.unitElement).css('width', w);
                     internal.unitWidth = w;
+                    // if we have infinite scrolling, add clones to the front and back of our our list.
                 };
 
 
