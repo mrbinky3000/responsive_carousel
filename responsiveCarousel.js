@@ -90,7 +90,8 @@
 			slideTimer: null,
 			slideBumped: false,
             nudgeDirection: null,
-            infinite: false  // not used yet. just a placeholder.
+            infinite: true,
+            numVisibleUnits: 0
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -109,6 +110,14 @@
             };
         },
 
+
+        /**
+         * Automagically add the correct vendor specific prefix to edge-css attributes, like transition for example.
+         *
+         * @param prop string A string representing a CSS property
+         * @return string The prefixed CSS property if prefixing exists. If there is also an non-prefixed version or no prefix exists, return the original non-prefixed value of prop.
+         * @private
+         */
         _getPrefix: function (prop) {
             var prefixes = ['Moz', 'Webkit', 'Khtml', '0', 'ms'],
                 elem = document.createElement('div'),
@@ -130,8 +139,6 @@
             return '-' + pref.toLowerCase() + '-';
 
         },
-
-
 
         /**
          * A proxy function that should be called to animate stuff instead of using jQuery's $.animate() function.
@@ -176,8 +183,6 @@
             });
         },
 
-
-
         /**
          * Compute the new width for the target element (the element that holds all the things
          * that slide). Store the new width in our internal object.  Finally, assign the target
@@ -219,12 +224,47 @@
             var options = this.options,
                 internal = this.internal,
                 $target = $(this.element).find(options.target),
-                currentLeft  = $target.position().left,
-                currentRight = internal.targetOuterWidth + currentLeft,
-                $arrowLeft = $(this.element).find(options.arrowLeft),
-                $arrowRight = $(this.element).find(options.arrowRight),
+                currentLeft, // = $target.position().left,
+                currentRight, // = internal.targetOuterWidth + currentLeft,
+                $arrowLeft, // = $(this.element).find(options.arrowLeft),
+                $arrowRight, // = $(this.element).find(options.arrowRight),
                 maskLeft = 0,
-                maskRight = internal.targetParentOuterWidth;
+                maskRight = internal.targetParentOuterWidth,
+                that = this,
+
+                _update_position = function(s) {
+                    currentLeft  = $target.position().left;
+                    currentRight = internal.targetOuterWidth + currentLeft;
+                    $arrowLeft = $(that.element).find(options.arrowLeft);
+                    $arrowRight = $(that.element).find(options.arrowRight);
+
+                    console.log(s);
+                    console.log('maskLeft:',maskLeft);
+                    console.log('currentLeft:',currentLeft);
+                    console.log('currentRight:',currentRight);
+                    console.log('maskRight:',maskRight);
+                    console.log('---');
+
+                };
+
+
+            _update_position('first');
+
+            // infinite scroll?
+            if (internal.infinite === true) {
+                if (currentRight <= maskRight) {
+                    console.log('jump to ', internal.numVisibleUnits);
+                    this.goToSlide(internal.numVisibleUnits,false);
+                    _update_position('currentRight <= maskRight');
+                }
+                if (currentLeft >= maskLeft) {
+                    console.log('jump to ' , internal.numVisibleUnits * 3);
+                    this.goToSlide(internal.numVisibleUnits * 3, false);
+                    _update_position('currentLeft >= maskLeft');
+                }
+            } else {
+
+            }
 
 			// right arrow
             if (currentRight <= maskRight) {
@@ -422,8 +462,11 @@
                 options = this.options,
                 $target = $(this.element).find(options.target),
                 $el = $(this.element),
-                $firstUnit = $target.find(options.unitElement).eq(0),
+                $units = $target.find(options.unitElement + ':not(.clone)'),
+                $firstUnit = $units.eq(0),
+                numUnits = $units.length,
                 delay = new this.wait(),
+
 
 
                 _importWidthFromDOM = function () {
@@ -431,7 +474,8 @@
                 },
 
                 _setResponsiveUnitWidth = function () {
-                    var maskInnerWidth = $el.find(options.mask).innerWidth();
+                    var maskInnerWidth = $el.find(options.mask).innerWidth(),
+                        numClones = null;
                     m = options.responsiveUnitSize($el, internal, options);
                     if ('number' !== typeof m || m < 1) {
                         throw new Error("The responsiveUnitSize callback must return a whole number greater than 0");
@@ -440,10 +484,20 @@
                     w = Math.floor(w);
                     $target.find(options.unitElement).css('width', w);
                     internal.unitWidth = w;
-                    // if we have infinite scrolling, add clones to the front and back of our our list.
+                    internal.numVisibleUnits = m;
+                    // if we have infinite scrolling, add clones to the front and back of our our list. to give the illusion of infinite scrolling
+                    if (internal.infinite === true && m > 1) {
+                        numClones = m;
+                        // clear all the old clones, make way for the new clones.
+                        $target.find('.clone').remove();
+                        // make new clones
+                        $units.slice(0,numClones).clone(true).addClass('clone').appendTo($target);
+                        $units.slice(numUnits - numClones, numUnits).clone(true).addClass('clone').prependTo($target);
+                    } else {
+                        // console.log('no infinite', internal.infinite);
+                    }
 
                 };
-
 
 
             if (options.unitWidth === 'inherit') {
@@ -727,21 +781,26 @@
          * Make a specified slide the left-most visible slide in the slider
          * @public
          */
-		goToSlide: function (i) {
+		goToSlide: function (i,a) {
             var that = this,
                 internal = this.internal,
 				options = this.options,
 				$target = $(this.element).find(options.target),
 				newLeft;
 
+            a = typeof a !== 'undefined' ? a : true;
+
 			this._setUnitWidth();
 			newLeft = i * internal.unitWidth * -1;
 			busy = true;
-			this._animate($target, {'left': newLeft}, options.speed, function () {
-				busy = false;
-				that._setArrowVisibility();
-			});
-
+            if (a === true) {
+                this._animate($target, {'left': newLeft}, options.speed, function () {
+                    busy = false;
+                    that._setArrowVisibility();
+                });
+            } else {
+                $target.css('left',newLeft);
+            }
 		},
 
         /**
