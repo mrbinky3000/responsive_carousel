@@ -1,4 +1,4 @@
-/*jslint nomen: true, browser: true */
+/*jslint nomen: true, browser: true, white: true, todo: true */
 /*global Modernizr, Hammer, jQuery */
 /*properties
     Widget, _animate, _clearInterval, _create, _doArrowBeingClicked, _dragEvents,
@@ -9,18 +9,18 @@
     currentSlide, data, 'data-slide', destroy, direction, distance, drag,
     dragEvents, drag_horizontal, drag_min_distance, drag_vertical, each, element,
     eq, find, firstMouseClick, floor, get, getCurrentSlide, getTime, goToSlide,
-    hasOwnProperty, height, hide, hold, innerWidth, internal,
+    hasOwnProperty, height, hide, hold, infinite, innerWidth, internal,
     isArrowBeingClicked, isFunction, left, length, mask, nudgeDirection,
-    nudgeThreshold, on, onRedraw, onShift, ondrag, ondragend, ondragstart,
-    options, outerHeight, outerWidth, parent, parents, position, prefix,
-    preventDefault, prototype, redraw, responsiveStep, responsiveUnitSize,
-    setInterval, setTimeout, show, slice, slideBumped, slideShowActive,
-    slideSpeed, slideTimer, speed, step, stop, style, tap, tap_double, target,
-    targetBackupCopy, targetLeft, targetOuterHeight, targetOuterWidth,
-    targetParentInnerWidth, targetParentMarginLeft, targetParentOuterHeight,
-    targetParentOuterWidth, targetWidth, thenDo, time, timer, toLowerCase,
-    toUpperCase, toggleSlideShow, top, transform, unbind, unitElement, unitWidth,
-    wait, widget, width
+    nudgeThreshold, numUnits, numVisibleUnits, on, onRedraw, onShift,
+    ondrag, ondragend, ondragstart, options, outerHeight, outerWidth, parent,
+    parents, position, prefix, preventDefault, prototype, redraw, responsiveStep,
+    responsiveUnitSize, setInterval, setTimeout, show, slice, slideBumped,
+    slideShowActive, slideSpeed, slideTimer, speed, step, stop, style, tap,
+    tap_double, target, targetBackupCopy, targetLeft, targetOuterHeight,
+    targetOuterWidth, targetParentInnerWidth, targetParentMarginLeft,
+    targetParentOuterHeight, targetParentOuterWidth, targetWidth, thenDo, time,
+    timer, toLowerCase, toUpperCase, toggleSlideShow, top, transform, unbind,
+    unitElement, unitWidth, wait, widget, width
 */
 /*!
  * responsiveCarousel
@@ -60,10 +60,10 @@
 			slideSpeed: 2500,
 			step: -1,
 			responsiveStep: null,
-		    onShift: null,
+            onShift: null,
             cssAnimations: Modernizr.csstransitions,
             nudgeThreshold: 10,
-            infinite: true
+            infinite: false
         },
 
         // a place to store internal vars used only by this instance of the widget
@@ -90,7 +90,8 @@
 			slideTimer: null,
 			slideBumped: false,
             nudgeDirection: null,
-            infinite: true,
+            infinite: false,
+            numUnits:0,
             numVisibleUnits: 0
         },
 
@@ -98,7 +99,7 @@
         // prevents runaway conditions (like during a window resize)
         wait: function () {
             var t, _d = function (callback, ms) {
-                if ('undefined' !== typeof t) {
+                if (undefined !== t) {
                     window.clearTimeout(t);
                 }
                 t = window.setTimeout(callback, ms);
@@ -112,7 +113,7 @@
 
 
         /**
-         * Automagically add the correct vendor specific prefix to edge-css attributes, like transition for example.
+         * Automatically add the correct vendor specific prefix for a css property if there is no native support.
          *
          * @param prop string A string representing a CSS property
          * @return string The prefixed CSS property if prefixing exists. If there is also an non-prefixed version or no prefix exists, return the original non-prefixed value of prop.
@@ -126,17 +127,19 @@
                 len = prefixes.length;
 
             while (len > -1) {
-                if (typeof elem.style[prefixes[len] + upper] !== 'undefined') {
+                if (elem.style[prefixes[len] + upper] !== undefined) {
                     pref = (prefixes[len]);
                 }
                 len = len - 1;
             }
 
             if (elem.style[prop]) {
-                pref = (prop);
+                pref = prop.toLowerCase();
+            } else {
+                pref =  '-' + pref.toLowerCase() + '-';
             }
 
-            return '-' + pref.toLowerCase() + '-';
+            return pref;
 
         },
 
@@ -156,31 +159,83 @@
          * @private
          */
         _animate: function ($target, props, speed, callback) {
+
             var options = this.options,
-                internal = this.internal;
+                internal = this.internal,
+                transition = internal.prefix + 'transition',
+                currentLeft = $target.position().left,
+                newLeft = props.left,
+                diff = currentLeft + newLeft,
+                i;
+
+            // options for seamless looping
+            if (options.infinite === true) {
+                if (newLeft !== undefined) {
+                    if (newLeft < currentLeft) {
+                        // sliding to the left
+                        // Am I at the start of the clones?
+                        i = internal.unitWidth * (internal.numUnits - internal.numVisibleUnits) * -1;
+                        if (currentLeft === i) {
+                            // Yes! Jump to start of carousel first
+                            $target.css({
+                                transition : '',
+                                'left' : 0
+                            });
+                            props.left = -internal.unitWidth;
+                        }
+                        // No! Go ahead and slide left
+                    } else if (newLeft > currentLeft) {
+                        // sliding to the right
+                        // Is current left at 0?
+                        if (currentLeft === 0 ) {
+                            // Yes! Jump to the start of the clones
+                            i = $target.find('.clone:first').position().left * -1;
+                            $target.css({
+                                transition : '',
+                                'left' : i
+                            });
+                            props.left = i + diff;
+                        }
+                        // No! Go ahead and slide right
+                    }
+                    /*
+                    else {
+                        // do nothing
+                    }
+                    */
+                }
+
+                /*
+                else {
+                    // console.warn('undefined!!!');
+                }
+                */
+            }
 
 
-
-            return $target.each(function () {
-                var $this = $(this),
-                    prefix = (internal.prefix);
-
+            // stupid hack! For some reason, if this was not delayed, the code above for jumping to particular spots if
+            // infinite scrolling was enabled, would not work.  The transition below was being applied even though the
+            // jumps on line 183, and 197 occur way before the one on 214.  Have NO IDEA why.  So, 1 ms delay fixed it.
+            window.setTimeout(function () {
                 if (options.cssAnimations) {
-                    $this.css(prefix + 'transition', 'all ' + speed / 1000 + 's ease-in-out').css(props);
+                    $target.css(transition, 'all ' + speed / 1000 + 's ease-in-out').css(props);
                     window.setTimeout(function () {
-                        $this.css(prefix + 'transition', '');
+                        // execute a the supplied callback (if any) that was given to _animate
+                        $target.css(transition, '');
                         if ($.isFunction(callback)) {
                             callback();
                         }
                     }, speed);
                 } else {
-                    $this.animate(props, speed, function () {
+                    $target.animate(props, speed, function () {
                         if ($.isFunction(callback)) {
                             callback();
                         }
                     });
                 }
-            });
+
+            },1);
+
         },
 
         /**
@@ -199,8 +254,8 @@
                 $target = $(this.element).find(options.target);
 
             caller = ' ' + caller; // shut up jsLint
-
-            internal.targetWidth =  $target.find(options.unitElement).length * internal.unitWidth;
+            internal.numUnits = $target.find(options.unitElement).length;
+            internal.targetWidth =  internal.numUnits * internal.unitWidth;
             $el.find(options.target).width(internal.targetWidth);
             internal.targetOuterWidth = $target.outerWidth();
             internal.targetOuterHeight = $target.outerHeight();
@@ -224,50 +279,26 @@
             var options = this.options,
                 internal = this.internal,
                 $target = $(this.element).find(options.target),
-                currentLeft, // = $target.position().left,
-                currentRight, // = internal.targetOuterWidth + currentLeft,
-                $arrowLeft, // = $(this.element).find(options.arrowLeft),
-                $arrowRight, // = $(this.element).find(options.arrowRight),
+                currentLeft  = $target.position().left,
+                currentRight = internal.targetOuterWidth + currentLeft,
+                $arrowLeft = $(this.element).find(options.arrowLeft),
+                $arrowRight = $(this.element).find(options.arrowRight),
                 maskLeft = 0,
-                maskRight = internal.targetParentOuterWidth,
-                that = this,
-
-                _update_position = function(s) {
-                    currentLeft  = $target.position().left;
-                    currentRight = internal.targetOuterWidth + currentLeft;
-                    $arrowLeft = $(that.element).find(options.arrowLeft);
-                    $arrowRight = $(that.element).find(options.arrowRight);
-
-                    console.log(s);
-                    console.log('maskLeft:',maskLeft);
-                    console.log('currentLeft:',currentLeft);
-                    console.log('currentRight:',currentRight);
-                    console.log('maskRight:',maskRight);
-                    console.log('---');
-
-                };
+                maskRight = internal.targetParentOuterWidth;
 
 
-            _update_position('first');
+            /*
+            console.log(s);
+            console.log('maskLeft:',maskLeft);
+            console.log('currentLeft:',currentLeft);
+            console.log('currentRight:',currentRight);
+            console.log('maskRight:',maskRight);
+            console.log('---');
+            */
 
-            // infinite scroll?
-            if (internal.infinite === true) {
-                if (currentRight <= maskRight) {
-                    console.log('jump to ', internal.numVisibleUnits);
-                    this.goToSlide(internal.numVisibleUnits,false);
-                    _update_position('currentRight <= maskRight');
-                }
-                if (currentLeft >= maskLeft) {
-                    console.log('jump to ' , internal.numVisibleUnits * 3);
-                    this.goToSlide(internal.numVisibleUnits * 3, false);
-                    _update_position('currentLeft >= maskLeft');
-                }
-            } else {
-
-            }
 
 			// right arrow
-            if (currentRight <= maskRight) {
+            if (options.infinite !== true && currentRight <= maskRight) {
                 $arrowRight.hide();
                 if (internal.isArrowBeingClicked === true) {
                     this._clearInterval();
@@ -281,7 +312,7 @@
             }
 
 			// left arrow
-            if (currentLeft >= maskLeft) {
+            if (options.infinite !== true && currentLeft >= maskLeft) {
                 $arrowLeft.hide();
                 if (internal.isArrowBeingClicked === true) {
                     this._clearInterval();
@@ -339,7 +370,6 @@
             if (busy === true) {
                 return;
             }
-
 
 
             if (direction === "left") {
@@ -464,7 +494,6 @@
                 $el = $(this.element),
                 $units = $target.find(options.unitElement + ':not(.clone)'),
                 $firstUnit = $units.eq(0),
-                numUnits = $units.length,
                 delay = new this.wait(),
 
 
@@ -486,16 +515,18 @@
                     internal.unitWidth = w;
                     internal.numVisibleUnits = m;
                     // if we have infinite scrolling, add clones to the front and back of our our list. to give the illusion of infinite scrolling
-                    if (internal.infinite === true && m > 1) {
+                    if (options.infinite === true && m > 1) {
                         numClones = m;
                         // clear all the old clones, make way for the new clones.
                         $target.find('.clone').remove();
                         // make new clones
                         $units.slice(0,numClones).clone(true).addClass('clone').appendTo($target);
-                        $units.slice(numUnits - numClones, numUnits).clone(true).addClass('clone').prependTo($target);
-                    } else {
-                        // console.log('no infinite', internal.infinite);
                     }
+                    /*
+                    else {
+                        console.log('no infinite', options.infinite);
+                    }
+                    */
 
                 };
 
@@ -788,7 +819,7 @@
 				$target = $(this.element).find(options.target),
 				newLeft;
 
-            a = typeof a !== 'undefined' ? a : true;
+            a = (a !== undefined) ? a : true;
 
 			this._setUnitWidth();
 			newLeft = i * internal.unitWidth * -1;

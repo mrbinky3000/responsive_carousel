@@ -25,13 +25,14 @@ Please help me out by testing on other browsers so I can add to the support list
 - Android Browser (~Chrome 12)
 
 ##Overhead
-
+How many KB does it take to get your Note: These are non-gzipped sizes.  Using gzip compression on your server can decrease sizes even more.
 - 32kb : jQuery
-- 8kb : jQuery UI (you only need the core and widget factory)
+- 8kb : jQuery UI (you ONLY need the core and widget factory)
 - 2kb : hammer.js
 - 2.4kb : Modernizer (you only need the "CSS3 Transitions" test)
+- 9.23kb : responsiveCarousel.min.js (note, when gzip compression is enabled on your server, the size is 2.88kb)
 
-Total overhead: 44.5kb (but you're prob already using jquery, so really it's like 12.4kb)
+Total overhead (without gzip): 53.5kb (but you're prob already using jquery, so really it's like 21.63kb)
 
 ##History
 

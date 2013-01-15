@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0'
           name='viewport'/>
-    <title>responsiveCarousel Example - 1</title>
+    <title>responsiveCarousel Example - 3</title>
     <script>
         /* This is not part of the example!  It's here so I can track any javascript errors that you may encounter and then
          * fix them.
@@ -174,7 +174,7 @@
             background-color: #CCC;
         }
 
-        #example-1 {
+        #example-3 {
             padding: 1em;
             background-color: #2f4f4f;
         }
@@ -201,9 +201,9 @@
     </script>
 </head>
 <body>
-<h1>Example 1</h1>
+<h1>Example 3</h1>
 
-<p>A simple product carousel.  You can drag this with your mouse and, if you have a touch screen, with your finger.</p>
+<p>A simple product carousel. Similar to example 1, only this one has infinite scrolling enabled.   You can drag this with your mouse and, if you have a touch screen, with your finger.</p>
 
 <p id="menu">
     <span>[ <a href="https://github.com/mrbinky3000/responsive_carousel">Github</a> ]</span>
@@ -212,7 +212,7 @@
     <span>[ <a href="example-3.html">Example 3</a> ]</span>
 </p>
 
-<div class="kill-long-press examples" id="example-1">
+<div class="kill-long-press examples" id="example-3">
     <div class="slider">
         <div class="slider-nav">
             <div class="arrow-left arrow"><a href="#" title="Back"></a></div>
@@ -268,13 +268,17 @@
     /* Okay, everything is loaded. Let's go! (on dom ready) */
     $(function () {
 
-        /* a generic product carousel - something that might appear in the body of a e-commerce site. */
-        $('#example-1')
+        /*
+            A generic product carousel - something that might appear in the body of a e-commerce site. Unlike example 1,
+            this example uses infinite scrolling.
+        */
+        $('#example-3')
                 .responsiveCarousel({
+                    infinite: true, // turn on infinite scrolling
                     unitWidth:'compute',
                     dragEvents: true,  // uncomment this line and comment the line below if you want mouse drag on regular screens and touch screens
                     //dragEvents: Modernizr.touch,  // uncomment this line and comment the line above if you only want touch-enabled screens to have drag functionality.
-                    responsiveUnitSize:function () {
+                    responsiveUnitSize: function () {
                         var m, w, i = $(document).width(); // use the document width as a measuring stick to determine how many elements we want in the carousel.
                         if (i > 900) {
                             m = 5;
@@ -293,9 +297,10 @@
                         }
                         return m;
                     },
-                    onRedraw:function () {
+                    onRedraw: function () {
                         // optional callback that is called after the slider is done adjusting to a new window width.  You can
-                        // perform all sorts of cleanup here if you wish.  See my makeSameHeight jQuery plugin on github!
+                        // perform all sorts of cleanup here if you wish.  For example, if you want to set all the
+                        // li elements to the same height, you can use my makeSameHeight jQuery plugin on github!
                     }
                 });
 
