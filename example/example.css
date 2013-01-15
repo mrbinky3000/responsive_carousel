@@ -1,0 +1,174 @@
+
+
+/* This is the parent of all the elements in our carousel.  We want relative
+positioning so that later on, we can push the navigation arrows to the left
+and right. */
+.slider {
+    position: relative;
+    zoom: 1;
+    background-color: #556b2f;
+}
+
+/* This container holds the navigation arrows.  We just want a width but no
+height so that this div doesn't cover up the carousel elements and make them
+unclickable on some browsers.  */
+.slider-nav {
+    position: absolute;
+    zoom: 1;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* This holds common styles for both the left and right navigation arrow
+container divs. Even though this div's parent has no height, the overflow is
+visible by default, so we can see and click on the arrows. */
+.arrow {
+    width: 42px;
+    height: 175px;
+    position: absolute;
+    zoom: 1;
+    top: 0;
+}
+
+/* This holds common styles for both the left and right navigation arrow anchors
+I'm using spans for the arrow call-to-action instead of an anchor tag because anchor
+tags and buttons on Android devices bring up a "long hold" dialog button asking you if
+you want to save the URL of the anchor tag or open it in another tab.  There is no reliable
+CSS or JavaScript method for suppressing that dialog, so I circumvent it by using the span
+tag */
+.arrow span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: red;
+    cursor: pointer;
+}
+
+/* When not clickable */
+.arrow span.disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* position the left arrow */
+.arrow-left {
+    left: 0;
+}
+
+/* position the right arrow */
+.arrow-right {
+    right: 0;
+}
+
+/* This container is used to pull-in the carousel mask from the left and right
+so that it does not cover up the arrows. You should also apply any desired
+padding and stuff to this div instead of applying it directly to the mask.
+Applying left and right padding to the mask can mess up the calculations unless
+you account for it.  To future-proof your design from messups caused by updates
+to the css in the future, apply spacing and positioning to this div, and not
+directly to the mask. */
+.slider-mask-wrap {
+    margin: 0 48px;
+}
+
+/* The mask container contains all the list elements that make up the carousel.
+It acts as a mask, hiding those list elements that are too far to the left or
+right.  It gives the illusion that we are dynamically adding or subtracting
+divs using javascript or magic as we slide from left to right */
+.slider-mask {
+    overflow: hidden;
+    position: relative;
+    zoom: 1;
+}
+
+/* The target is the div that actually slides from left to right.   The width will
+be overwritten by our javascript.  Just set it wide enough here to prevent wrapping
+when the page loads.  Set it to 9999px or something obnoxiously large if you like */
+.slider-target {
+    width: 2000px;
+    margin: 0 auto;
+}
+
+/* Remove padding and list style from our unordered list.  Your current CSS reset
+might already handle this. */
+.slider ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+/* These the individual elements in our carousel.  They all need to be the same
+width.  The height can vary, but it might look unattractive if they do.  See my
+jQuery plugin makeSameHeight located here https://github.com/mrbinky3000/makeSameHeight
+if you want a dynamic method of keeping the carousel items at a uniform height as
+the page expands and retracts.  Stick it into the redraw callback.  More on that
+in the documentation.
+
+NOTE: Do not apply margin or border to the slider elements (li).  Make an inner
+container and apply it there if needed.
+
+NOTE:  The width is overwritten by the plugin. This is just initial page load width.
+However, the height remains untouched.
+*/
+.slider li {
+    width: 175px;
+    height: 175px;
+    float: left;
+    margin: 0;
+    padding: 0;
+}
+
+/* Not required, but makes life a lot easier.  You will most likely want to keep it.
+if you are concerned about older browsers, there are shims like:
+https://github.com/Schepp/box-sizing-polyfill  */
+.slider li * {
+    box-sizing: border-box;
+}
+
+/* This element is optional. Keep it and fill it with your own stuff, or replace
+it with your own stuff.  */
+.slider .inner {
+    padding: 10px;
+    margin: 0 5px;
+    border: 1px solid #333;
+    height: 100%;
+    background-color: #CCC;
+}
+
+.examples {
+    padding: 1em;
+    background-color: #2f4f4f;
+}
+#menu span {
+    white-space: nowrap;
+}
+
+
+/* selector styling */
+#selector a {
+	display: block;
+	width: 16px;
+	height: 16px;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	border: 1px solid #333;
+	background-color: #99F;
+}
+#selector a.current {
+	background-color: #309;
+}
+#selector ul {
+	margin:0;
+	padding:0;
+	list-style-type: none;
+}
+#selector li {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+#menu span {
+    white-space: nowrap;
+}

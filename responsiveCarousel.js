@@ -9,12 +9,12 @@
     currentSlide, data, 'data-slide', destroy, direction, distance, drag,
     dragEvents, drag_horizontal, drag_min_distance, drag_vertical, each, element,
     eq, find, firstMouseClick, floor, get, getCurrentSlide, getTime, goToSlide,
-    hasOwnProperty, height, hide, hold, infinite, innerWidth, internal,
+    hasOwnProperty, height, hold, infinite, innerWidth, internal,
     isArrowBeingClicked, isFunction, left, length, mask, nudgeDirection,
     nudgeThreshold, numUnits, numVisibleUnits, on, onRedraw, onShift,
     ondrag, ondragend, ondragstart, options, outerHeight, outerWidth, parent,
     parents, position, prefix, preventDefault, prototype, redraw, responsiveStep,
-    responsiveUnitSize, setInterval, setTimeout, show, slice, slideBumped,
+    responsiveUnitSize, setInterval, setTimeout, slice, slideBumped,
     slideShowActive, slideSpeed, slideTimer, speed, step, stop, style, tap,
     tap_double, target, targetBackupCopy, targetLeft, targetOuterHeight,
     targetOuterWidth, targetParentInnerWidth, targetParentMarginLeft,
@@ -47,8 +47,8 @@
 
         //Options to be used as defaults
         options: {
-            arrowLeft: '.arrow-left a',
-            arrowRight: '.arrow-right a',
+            arrowLeft: '.arrow-left span',
+            arrowRight: '.arrow-right span',
             target: '.slider-target',
             mask: '.slider-mask',
             unitElement: 'li',
@@ -299,28 +299,28 @@
 
 			// right arrow
             if (options.infinite !== true && currentRight <= maskRight) {
-                $arrowRight.hide();
+                $arrowRight.addClass('disabled');
                 if (internal.isArrowBeingClicked === true) {
                     this._clearInterval();
                 }
                 internal.arrowRightVisible = internal.isArrowBeingClicked = false;
             } else {
                 if (false === internal.arrowRightVisible) {
-                    $arrowRight.show();
+                    $arrowRight.removeClass('disabled');
                     internal.arrowRightVisible = true;
                 }
             }
 
 			// left arrow
             if (options.infinite !== true && currentLeft >= maskLeft) {
-                $arrowLeft.hide();
+                $arrowLeft.addClass('disabled');
                 if (internal.isArrowBeingClicked === true) {
                     this._clearInterval();
                 }
                 internal.arrowLeftVisible = internal.isArrowBeingClicked  = false;
             } else {
                 if (false === internal.arrowLeftVisible) {
-                    $arrowLeft.show();
+                    $arrowLeft.removeClass('disabled');
                     internal.arrowLeftVisible = true;
                 }
             }
@@ -405,7 +405,6 @@
                 eventStringDown = "",
                 eventStringUp = "";
 
-
             // discard click on left arrow
             $arrowLeft.on('click.responsiveCarousel', function (ev) {
                 ev.preventDefault();
@@ -428,7 +427,7 @@
             // left arrow, move left
             $arrowLeft.on(eventStringDown, function (ev) {
                 ev.preventDefault();
-                if (busy === false) {
+                if (busy === false && !$arrowLeft.hasClass('disabled')) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () {that._doArrowBeingClicked('left'); }, 10);
                     if (internal.slideTimer) {
@@ -442,7 +441,7 @@
             // right arrow, move right
             $arrowRight.on(eventStringDown, function () {
 
-                if (busy === false) {
+                if (busy === false && !$arrowRight.hasClass('disabled')) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () {that._doArrowBeingClicked('right'); }, 10);
 					if (internal.slideTimer) {
