@@ -866,16 +866,18 @@
 
                     if (internal.slideBumped === false) {
 
-                        // too far left
-                        if (newRight <= width) {
-                            adjustedLeft = newLeft + width - newRight;
-                            internal.slideBumped = 'left';
-                        }
+                        if (options.infinite === false) {
+                             // too far left
+                            if (newRight <= width) {
+                                adjustedLeft = newLeft + width - newRight;
+                                internal.slideBumped = 'left';
+                            }
 
-                        // too far right
-                        if (newLeft >= 0) {
-                            internal.slideBumped = 'right';
-                            adjustedLeft = 0;
+                            // too far right
+                            if (newLeft >= 0) {
+                                internal.slideBumped = 'right';
+                                adjustedLeft = 0;
+                            }
                         }
 
                     } else {
