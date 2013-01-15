@@ -15,7 +15,7 @@ See it in Action:
 support CSS3 transitions.  If Facebook's javascript API is also included on the page it will further slow down older Androids because Facebook causes page reflows every few miliseconds.
 
 
-----------
+
 
 
 ##Supported Browsers
@@ -27,7 +27,7 @@ Please help me out by testing on other browsers so I can add to the support list
 - iPhone / iPad (safari)
 - Android Browser (~Chrome 12)
 
-----------
+
 
 
 ##Overhead
@@ -40,8 +40,6 @@ How many KB does it take to get your Note: These are non-gzipped sizes.  Using g
 
 Total overhead (without gzip): **54.4kb** (However, you're already using jQuery on your site for other things, so the overhead is really **22.4kb**, and if you are already using jQuery UI, then overhead added by this script drops to **14.4kb**.)
 
-----------
-
 
 ##History
 
@@ -51,7 +49,6 @@ I took care to minimize the number of reflows caused by the code.   I used the t
 reflows. I also use fast CSS3 transitions that fall back to jQuery's default
 $.animation() method.
 
-----------
 
 
 ##To Do List
@@ -60,8 +57,6 @@ $.animation() method.
 - ~~Automatic slide show option.  Should be easy enough.~~ DONE!
 - ~~get-able property with the currently left-most visible slide unit~~ DONE!
 - ~~Infinite scroll / slide show  (Buggy beta version available in experimental branch.  Will most likely re-write infinite scroll with new approach.) DONE!
-
-----------
 
 
 ##Known Bugs
@@ -72,8 +67,6 @@ Please report any bugs encountered!  I will fix em'
 - Sometimes arrows become un responsive if you press them in rapid succession on older iPads / iPhones.  A quick swipe with your finger seems to make the arrows respond again.
 - ~~Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is constantly causing the browser to do a repaint every few milliseconds. Seems to be fixed!
 - As of Chrome 18 for mobile, while holding down the arrows for continuous sliding, sometimes the animation stops for some unknown reason.  Chrome is starting their rapid-update schedule for their mobile browser starting in March of 2013, so hopefully this issue goes away. 
-
-----------
 
 
 ##Config Options
@@ -151,7 +144,7 @@ The minimum amount of pixels the user must drag the target before we force a sli
 ####infinite (boolean)
 Set this to true to have infinite scrolling. This means when you reach the ends of carousel, the carousel starts over again.  Hint: Combine infinite with toggleSlideShow() to have an infinite slide show. See [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html "Example 2") and [Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html "Example 4")
 
-----------
+
 
 
 ## Methods
@@ -174,7 +167,7 @@ Jump to slide i (numbering starts at zero). Set "a" to true to use animation. Se
 ####destroy()
 Clean up all event handlers and HTML added by this widget. 
 
-----------
+
 
 
 
