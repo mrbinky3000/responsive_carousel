@@ -651,10 +651,11 @@
                 content_dim = {},
 
                 getScrollPosition = function () {
-                    return {
+                    var o = {
                         top: parseInt(content.css('top'), 10),
                         left: parseInt(content.css('left'), 10)
                     };
+                    return o;
                 };
 
 
@@ -682,12 +683,16 @@
 
             hammer.ondrag = function (ev) {
 
+                //console.log(ev);
+
                 if (true === internal.isArrowBeingClicked) {
                     // prevent jitters due to fat fingers touching scroll arrow and carousel at same time.
                     return;
                 }
 
-				var delta = 1, left;
+				var delta = 3,
+                    left,
+                    startOfClones = internal.unitWidth * (internal.numUnits - internal.numVisibleUnits) * -1;
 
                 internal.nudgeDirection = null;
 
@@ -703,6 +708,18 @@
                 }
 
                 left = scroll_start.left + ev.distance * delta;
+
+                // hey!  infinite scrolling!
+                if (options.infinite === true) {
+                    if (left <= startOfClones) {
+                        left = 0 + ev.distance * delta;
+                    }
+                    if (left >= 0) {
+                        left = startOfClones + ev.distance * delta;
+                    }
+                }
+
+
                 internal.left = left;
 				content.css('left', left);
 
