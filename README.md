@@ -56,16 +56,16 @@ $.animation() method.
 - Make it so that you can choose which touch events library you want to use.  Right now it requires hammer.js, but lets say you preferr swipe.js.
 - ~~Automatic slide show option.  Should be easy enough.~~ DONE!
 - ~~get-able property with the currently left-most visible slide unit~~ DONE!
-- ~~Infinite scroll / slide show  (Buggy beta version available in experimental branch.  Will most likely re-write infinite scroll with new approach.) DONE!
+- ~~Infinite scroll / slide show  (Buggy beta version available in experimental branch.  Will most likely re-write infinite scroll with new approach.)~~ DONE!
 
 
 ##Known Bugs
 
 Please report any bugs encountered!  I will fix em'
 
-- ~~Things get weird if a user touches both the left and right scroll arrows at the same time. Seems to be fixed!
+- ~~Things get weird if a user touches both the left and right scroll arrows at the same time.~~ Seems to be fixed!
 - Sometimes arrows become un responsive if you press them in rapid succession on older iPads / iPhones.  A quick swipe with your finger seems to make the arrows respond again.
-- ~~Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is constantly causing the browser to do a repaint every few milliseconds. Seems to be fixed!
+- ~~Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is constantly causing the browser to do a repaint every few milliseconds.~~ Seems to be fixed!
 - As of Chrome 18 for mobile, while holding down the arrows for continuous sliding, sometimes the animation stops for some unknown reason.  Chrome is starting their rapid-update schedule for their mobile browser starting in March of 2013, so hopefully this issue goes away. 
 
 
