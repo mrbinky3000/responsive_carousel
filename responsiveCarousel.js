@@ -31,8 +31,8 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 0.4.0
- * @releaseDate 1/10/2013
+ * @version 0.5.0
+ * @releaseDate 1/15/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
  * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
