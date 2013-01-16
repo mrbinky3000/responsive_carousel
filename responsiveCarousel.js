@@ -31,8 +31,8 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 0.5.0
- * @releaseDate 1/15/2013
+ * @version 0.5.1
+ * @releaseDate 1/16/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
  * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
@@ -92,7 +92,8 @@
             nudgeDirection: null,
             infinite: false,
             numUnits:0,
-            numVisibleUnits: 0
+            numVisibleUnits: 0,
+            scrollStart: 0
         },
 
         // Execute a callback only after a series of events are done being triggered.
@@ -678,6 +679,10 @@
                     width: internal.targetOuterWidth,
                     height: internal.targetOuterHeight
                 };
+
+                // copy the scroll start position to internal storage so computeAdjust() can reference it when
+                // determining if a nudge makes it past the nudge threshold and warrants moving to the next slide
+                internal.scrollStart = scroll_start;
             };
 
             hammer.ondrag = function (ev) {
@@ -691,22 +696,31 @@
 
 				var delta = 3,
                     left,
+                    distance,
                     startOfClones = internal.unitWidth * (internal.numUnits - internal.numVisibleUnits) * -1;
 
-                internal.nudgeDirection = null;
-
-				if (ev.direction === 'up' || ev.direction === 'left') {
-					ev.distance = -ev.distance;
-                    if (Math.abs(ev.distance) > options.nudgeThreshold && Math.abs(ev.distance) < internal.unitWidth / 2) {
-                        internal.nudgeDirection = 'left';
-                    }
-				} else {
-                    if (ev.distance > options.nudgeThreshold && ev.distance < internal.unitWidth / 2) {
-                        internal.nudgeDirection = 'right';
-                    }
+                if (ev.direction === 'up' || ev.direction === 'left') {
+                    ev.distance = ev.distance * -1;
                 }
 
                 left = scroll_start.left + ev.distance * delta;
+                distance = Math.abs(internal.scrollStart.left - left);
+
+                // Determine if we've nudged the slider just enough to pass the minimum threshold for initiating a slide
+                // nudge must be more than the threshold, but less than the total unit width. if nudged, raise a flag
+                // that is handled by computeAdjust() later.
+                if ((distance > options.nudgeThreshold) && (distance < internal.unitWidth / 2)) {
+                    if (ev.direction === 'up' || ev.direction === 'left') {
+                        internal.nudgeDirection = 'left';
+                    } else {
+                        internal.nudgeDirection = 'right';
+                    }
+                }  else {
+                    internal.nudgeDirection = null;
+                }
+
+
+
 
                 // hey!  infinite scrolling!
                 if (options.infinite === true) {

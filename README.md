@@ -173,6 +173,9 @@ Clean up all event handlers and HTML added by this widget.
 
 ##Change Log
 
+### Version 0.5.1 -/16/2013
+- Bugfixes with nudgeThreshold option.  It was sometimes skipping a unit, going from 1 to 3 bypassing 2, for example. Fixed now.
+
 #### Version 0.5.0 - 1/15/2013
 - New Feature: Infinite Scrolling!
 - Bugfixes and speed enhancements
