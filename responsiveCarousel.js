@@ -31,7 +31,7 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 0.5.1
+ * @version 0.6.0
  * @releaseDate 1/16/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
