@@ -401,8 +401,8 @@
             var that = this,
                 options = this.options,
                 internal = this.internal,
-                $arrowLeft = $(this.element).find(options.arrowLeft),
-                $arrowRight = $(this.element).find(options.arrowRight),
+                $arrowLeft = $(options.arrowLeft),
+                $arrowRight = $(options.arrowRight),
                 eventStringDown = "",
                 eventStringUp = "";
 
