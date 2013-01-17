@@ -47,10 +47,11 @@
 
         //Options to be used as defaults
         options: {
+            autoWrap: false,
             arrowLeft: '.arrow-left span',
             arrowRight: '.arrow-right span',
-            target: '.slider-target',
             mask: '.slider-mask',
+            target: 'ul',
             unitElement: 'li',
             unitWidth: 'inherit',
             responsiveUnitSize: null,
@@ -256,7 +257,32 @@
 
             caller = ' ' + caller; // shut up jsLint
             internal.numUnits = $target.find(options.unitElement).length;
-            internal.targetWidth =  internal.numUnits * internal.unitWidth;
+
+            // if we are doing individual widths, then loop through all the unitElements and
+            // save each width as element data while totalling the width.
+            if (options.unitWidth === 'individual') {
+                internal.targetWidth = 0;
+                $el.find(options.unitElement).each(function(){
+                    var $this = $(this),
+                        width = 0;
+                    $this.css('width',''); // clear any previous width that we set.
+                    width = $this.outerWidth();
+                    internal.targetWidth = internal.targetWidth + width;
+                    $(this).data("responsiveCarousel",{
+                        'width' : width,
+                        'top' : $this.position().top,
+                        'right' : $this.position().left + $this.outerWidth(),
+                        'bottom' : $this.position().top + $this.outerHeight(),
+                        'left' : $this.position().left
+                    });
+                })
+            }
+
+            // All other unitWidth modes involve widths that are universal for all elements
+            else {
+                internal.targetWidth =  internal.numUnits * internal.unitWidth;
+            }
+
             $el.find(options.target).width(internal.targetWidth);
             internal.targetOuterWidth = $target.outerWidth();
             internal.targetOuterHeight = $target.outerHeight();
@@ -282,21 +308,21 @@
                 $target = $(this.element).find(options.target),
                 currentLeft  = $target.position().left,
                 currentRight = internal.targetOuterWidth + currentLeft,
-                $arrowLeft = $(this.element).find(options.arrowLeft),
-                $arrowRight = $(this.element).find(options.arrowRight),
+                $arrowLeft = $(options.arrowLeft),
+                $arrowRight = $(options.arrowRight),
                 maskLeft = 0,
-                maskRight = internal.targetParentOuterWidth;
+                maskRight = internal.targetParentOuterWidth,
+                p;
 
 
             /*
-            console.log(s);
+            //console.log(s);
             console.log('maskLeft:',maskLeft);
             console.log('currentLeft:',currentLeft);
             console.log('currentRight:',currentRight);
             console.log('maskRight:',maskRight);
             console.log('---');
             */
-
 
 			// right arrow
             if (options.infinite !== true && currentRight <= maskRight) {
@@ -328,7 +354,28 @@
 
 
 			// determine number of left-most visible slide
-			internal.currentSlide = $($target.find(options.unitElement)[Math.abs(currentLeft / internal.unitWidth)]).data('slide');
+            if (options.unitWidth === 'individual') {
+                // when in "individual" mode, each unit has a unique width.
+                for (var i = 0; i < internal.numUnits; i++) {
+                    p = $target.find(options.unitElement).eq(i);
+                    /*
+                    console.log(
+                        'i',i,
+                        "p.data('responsiveCarousel').left",p.data('responsiveCarousel').left,
+                        "p.data('responsiveCarousel').right",p.data('responsiveCarousel').right
+                    );
+                    */
+                    // todo, this loop gets slow for really long lists. We should come up with a way to cache internal.currentSlide
+                    if (Math.abs(currentLeft) >= p.data('responsiveCarousel').left && Math.abs(currentLeft) < p.data('responsiveCarousel').right ) {
+                        internal.currentSlide = p.data('slide');
+                        break;
+                    }
+                }
+            } else {
+                // All the other unit width modes (compute, inherit, integer) have units with the same
+                // width. So, it's easy to use math to find the current leftmost element.
+                internal.currentSlide = $($target.find(options.unitElement)[Math.abs(currentLeft / internal.unitWidth)]).data('slide');
+            }
 			if ($.isFunction(options.onShift)) {
 				options.onShift(internal.currentSlide);
 			}
@@ -372,14 +419,38 @@
                 return;
             }
 
+            if (options.unitWidth === 'individual') {
 
-            if (direction === "left") {
-                newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
-            } else if (direction === "right") {
-                newLeft =  currLeft - parentLeftOffset - internal.unitWidth;
+                // when options.unitWidth is set to "individual" each unit has a unique width.
+                if (direction === 'right') {
+                    if ( $target.find(options.unitElement).eq(internal.currentSlide + 1).length ) {
+                        newLeft = $target.find(options.unitElement).eq(internal.currentSlide + 1).data('responsiveCarousel').left * -1;
+                    } else {
+                        newLeft = currLeft - (internal.nudgeThreshold ? internal.nudgeThreshold : 20);
+                    }
+                } else if (direction === "left") {
+                    if ( $target.find(options.unitElement).eq(internal.currentSlide - 1).length ) {
+                        newLeft = $target.find(options.unitElement).eq(internal.currentSlide - 1).data('responsiveCarousel').left * -1;
+                    } else {
+                        newLeft = currLeft + (internal.nudgeThreshold ? internal.nudgeThreshold : 20);
+                    }
+                } else {
+                    throw new Error("unknown direction");
+                }
+
             } else {
-                throw new Error("unknown direction");
+
+                // all other unit width types (integer, compute, inherit) are uniform widths
+                if (direction === "left") {
+                    newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
+                } else if (direction === "right") {
+                    newLeft =  currLeft - parentLeftOffset - internal.unitWidth;
+                } else {
+                    throw new Error("unknown direction");
+                }
+
             }
+
 
 
             // do the animation here
@@ -453,11 +524,14 @@
             });
 
             // mouse is up / touch is over?
-            $(this.element).on(eventStringUp, function () {
-                if (internal.isArrowBeingClicked === true) {
-                    that._clearInterval();
-                }
+            $.each([$arrowLeft, $arrowRight], function (){
+                $(this).on(eventStringUp, function () {
+                    if (internal.isArrowBeingClicked === true) {
+                        that._clearInterval();
+                    }
+                });
             });
+
 
 
 
@@ -469,7 +543,14 @@
          * "inherit"
          * ---------
          * If options.unitWidth is set to the string 'inherit', use the current width of the
-         * slide unit (the blocks that go inside the slide target, like LI elements, for example)
+         * first slide unit encountered.  For example, if the slideUnit config option is 'li'
+         * Then all the li blocks get assigned the same width as the first 'li' element
+         * encountered.
+         *
+         * "individual"
+         * ------------
+         * If options.unitWidth is set to 'individual', each element can have it's own unique
+         * width.  When done dragging, snap the leftmost visible element to the left so that.
          *
          * "compute"
          * --------
@@ -552,6 +633,47 @@
 
                 });
 
+
+            } else if (options.unitWidth === 'individual') {
+
+                // first visit to the page
+                if ($.isFunction(options.onRedraw)) {
+                    options.onRedraw($el, internal, options);
+                }
+
+                // If the target has images in it's child elements, these images
+                // can cause the widths to change as the page is updated. To counter
+                // this, we'll re-run _setTargetWidth() after each image load in the
+                // target or it's child elements.
+                $target.find('img').on('load', function () {
+                    that._setTargetWidth('individual');
+                    that._setArrowVisibility();
+                    if ($.isFunction(options.onRedraw)) {
+                        options.onRedraw($el, internal, options);
+                    }
+                });
+
+                // re-import the width every time the page is re-sized.
+                $(window).on('resize.responsiveCarousel', function () {
+                    delay.thenDo(function () {
+                        var adjust;
+
+                        that._setTargetWidth('individual (window resize)');
+
+                        // keep the left-most fully visible object prior to the resize
+                        // in the left-most slot after the resize
+                        adjust = $target.find(options.unitElement).eq(internal.currentSlide).data('responsiveCarousel').left * -1;
+
+                        // if we are not animating a transition, update the scroll arrows
+                        $target.css({left: adjust});
+                        that._setArrowVisibility();
+
+                        if ($.isFunction(options.onRedraw)) {
+                            options.onRedraw($el, internal, options);
+                        }
+
+                    }, 100);
+                });
 
             } else if (options.unitWidth === 'compute') {
 
@@ -889,7 +1011,11 @@
             a = (a !== undefined) ? a : true;
 
 			this._setUnitWidth();
-			newLeft = i * internal.unitWidth * -1;
+            if (options.unitWidth === 'individual') {
+                newLeft = $target.find(options.unitElement).eq(i).data("responsiveCarousel").left;
+            } else {
+                newLeft = i * internal.unitWidth * -1;
+            }
 			busy = true;
             if (a === true) {
                 this._animate($target, {'left': newLeft}, options.speed, function () {
@@ -1014,6 +1140,7 @@
 
 
             var internal = this.internal,
+                options = this.options,
                 left = $target.position().left,
                 right,
                 mod,
@@ -1021,7 +1148,8 @@
                 width = internal.targetParentInnerWidth,
                 newLeft,
                 direction = internal.nudgeDirection,
-                unitWidth = internal.unitWidth;
+                unitWidth = internal.unitWidth,
+                p;
 
 
             // nudged with finger or mouse past the threshold level
@@ -1049,18 +1177,31 @@
 
 
             // keep left most fully visible object aligned with left border
-
-            mod = left % this.internal.unitWidth;
-
-            if (mod !== 0) {
-
-                if (mod < thresh) {
-                    newLeft =  left - (this.internal.unitWidth + mod);
+            if (options.unitWidth === 'individual') {
+                // when unitWidth is set to 'individual', each slider element has it's own unique width.
+                for (var i = 0; i < internal.numUnits; i++) {
+                    p = $target.find(options.unitElement).eq(i);
+                    if (Math.abs(left) >= p.data('responsiveCarousel').left && Math.abs(left) <= p.data('responsiveCarousel').right) {
+                        newLeft = p.data('responsiveCarousel').left * -1;
+                        break;
+                    }
                 }
-                if (mod > thresh) {
-                    newLeft = left - mod;
+            } else {
+                // all other options for options.unitWidth  (integer, compute, inherit) have uniform widths
+                mod = left % this.internal.unitWidth;
+                if (mod !== 0) {
+
+                    if (mod < thresh) {
+                        newLeft =  left - (this.internal.unitWidth + mod);
+                    }
+                    if (mod > thresh) {
+                        newLeft = left - mod;
+                    }
                 }
             }
+
+
+
 
             // compute the number of the left-most slide and store the number of the left-most slide
             return newLeft;

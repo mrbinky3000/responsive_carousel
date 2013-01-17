@@ -1,0 +1,58 @@
+/* The mask container contains all the list elements that make up the carousel.
+It acts as a mask, hiding those list elements that are too far to the left or
+right.  It gives the illusion that we are dynamically adding or subtracting
+divs using javascript or magic as we slide from left to right */
+.slider-mask {
+    overflow: hidden;
+    position: relative;
+    zoom: 1;
+}
+
+/* The target is the element (usually an UL) that actually slides from left to right.
+The width will be overwritten by our javascript.  Just set it wide enough here to
+prevent wrapping when the page loads.  Set it to 9999px or something obnoxiously large
+if you like */
+.slider-target {
+    width: 2000px;
+    margin: 0 auto;
+}
+
+/* Remove padding and list style from our unordered list.  Your current CSS reset
+might already handle this. Do not apply margins or borders to the slider elements.
+In this case, the slider elements are LI's.  */
+.slider-target, .slider-target li {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+/* NOTE: Do not apply margin or border to the slider elements (li).  Make an inner
+container and apply it there if needed. */
+.slider-target li {
+    display: block;
+    float: left;
+
+}
+
+.slider-target a {
+    padding: 0.8em 1em;
+    display: inline-block;
+    text-decoration: none;
+}
+.slider-target a:hover {
+    background-color: #ffffe0;
+}
+
+
+/* styling.  Not related to carousel functionality */
+.slider {
+    width: 400px;
+    margin: 0 auto;
+    border: 1px solid black;
+}
+
+/* When not clickable */
+span.disabled {
+    opacity: 0.3;
+    cursor: default;
+}
