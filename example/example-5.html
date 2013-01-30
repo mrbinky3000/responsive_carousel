@@ -111,10 +111,11 @@
         /* a generic product carousel - something that might appear in the body of a e-commerce site. */
         $('.slider')
                 .responsiveCarousel({
-                    unitWidth:'individual',
-                    dragEvents: true,  // uncomment this line and comment the line below if you want mouse drag on regular screens and touch screens
-                    //dragEvents: Modernizr.touch,  // uncomment this line and comment the line above if you only want touch-enabled screens to have drag functionality.
-                    onRedraw:function () {
+                    'infinite':     true,
+                    'unitWidth' :   'individual',
+                    'dragEvents' :  true,  // uncomment this line and comment the line below if you want mouse drag on regular screens and touch screens
+                    //dragEvents:   Modernizr.touch,  // uncomment this line and comment the line above if you only want touch-enabled screens to have drag functionality.
+                    'onRedraw' :    function () {
                         // optional callback that is called after the slider is done adjusting to a new window width.  You can
                         // perform all sorts of cleanup here if you wish.  See my makeSameHeight jQuery plugin on github!
                     }
