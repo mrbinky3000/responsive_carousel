@@ -2242,9 +2242,13 @@ jQuery.prototype.wrapInner = function(arg1) {};
 /**
  * @param {string} name
  * @param {Object=} options
- * @return {jQueryObject}
+ * @return {!jQuery}
  */
 jQuery.widget = function(name, options) {};
 
 
+/**
+ * @type {boolean}
+ * @const
+ */
 Modernizr.csstransitions
