@@ -31,8 +31,8 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 1.0.0
- * @releaseDate 1/30/2013
+ * @version 1.0.1
+ * @releaseDate 1/31/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
  * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
@@ -173,18 +173,7 @@
                         }
                         // No! Go ahead and slide right
                     }
-                    /*
-                    else {
-                        // do nothing
-                    }
-                    */
                 }
-
-                /*
-                else {
-                    // console.warn('undefined!!!');
-                }
-                */
             }
 
 
@@ -235,7 +224,6 @@
             // save each width as element data while totalling the width.
             if (options.unitWidth === 'individual') {
                 internal.targetWidth = 0;
-                //console.log('------');
                 $(options.unitElement).each(function(){
                     var $this = $(this),
                         width = 0;
@@ -245,7 +233,6 @@
                     $this.width(width);
                     // add the whole number to the total
                     internal.targetWidth = internal.targetWidth + width;
-                    //console.log(width,internal.targetWidth);
                     $(this).data("responsiveCarousel",{
                         'width' : width,
                         'top' : $this.position().top,
@@ -254,13 +241,11 @@
                         'left' : $this.position().left
                     });
                 });
-                //console.log('------');
             }
 
             // All other unitWidth modes involve widths that are universal for all elements
             else {
                 internal.targetWidth =  internal.numUnits * internal.unitWidth;
-                // console.log('internal.targetWidth =  internal.numUnits * internal.unitWidth', internal.targetWidth, internal.numUnits, internal.unitWidth);
             }
 
 
@@ -296,15 +281,6 @@
                 maskRight = internal.targetParentOuterWidth,
                 p;
 
-
-            /*
-            //console.log(s);
-            console.log('maskLeft:',maskLeft);
-            console.log('currentLeft:',currentLeft);
-            console.log('currentRight:',currentRight);
-            console.log('maskRight:',maskRight);
-            console.log('---');
-            */
 
 			// right arrow
             if ($arrowRight.length) {
@@ -346,13 +322,7 @@
                 // when in "individual" mode, each unit has a unique width.
                 for (var i = 0; i < internal.numUnits; i++) {
                     p = $(options.unitElement).eq(i);
-                    /*
-                    console.log(
-                        'i',i,
-                        "p.data('responsiveCarousel').left",p.data('responsiveCarousel').left,
-                        "p.data('responsiveCarousel').right",p.data('responsiveCarousel').right
-                    );
-                    */
+
                     // todo, this loop gets slow for really long lists. We should come up with a way to cache internal.currentSlide
                     if (Math.abs(currentLeft) >= p.data('responsiveCarousel').left && Math.abs(currentLeft) < p.data('responsiveCarousel').right ) {
                         internal.currentSlide = p.data('slide');
@@ -427,8 +397,6 @@
                 }
 
             } else {
-                //console.log('currLeft:',currLeft, ' parentLeftOffset:',parentLeftOffset, ' internal.unitWidth:',internal.unitWidth)
-
                 // all other unit width types (integer, compute, inherit) are uniform widths
                 if (direction === "left") {
                     newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
@@ -522,6 +490,13 @@
                     }
                 });
             });
+
+            // Other fringe events that require a cancel of an arrow touch event.
+            $(window).on('scroll.responsiveCarousel resize.responsiveCarousel onorientationchange.responsiveCarousel', function(){
+                that._clearInterval();
+            });
+
+
         },
 
         /**
@@ -554,8 +529,6 @@
          */
         _setUnitWidth: function () {
 
-            console.log('suw');
-
             var w, m,
                 that = this,
                 internal = this.internal,
@@ -583,27 +556,13 @@
                     $(options.unitElement).css('width', w);
 
                     // if we have infinite scrolling, add clones to the front and back of our our list. to give the illusion of infinite scrolling
-                    /*
-                    console.log('------');
-                    console.log('options.target:',options.target);
-                    console.log('options.infinite:',options.infinite);
-                    console.log('internal.numVisibleUnits:',internal.numVisibleUnits);
-                    console.log('m:',m);
-                    */
                     if (options.infinite === true && m > 0 && m !== internal.numVisibleUnits) {
                         internal.numVisibleUnits = m;
                         // clear all the old clones, make way for the new clones.
                         $target.find('.clone').remove();
                         // make new clones
-                        // console.log('making clones');
-                        // console.trace();
                         $units.slice(0,internal.numVisibleUnits).clone(true).addClass('clone').appendTo($target);
                     }
-                    /*
-                    else {
-                        console.log('no infinite', options.infinite);
-                    }
-                    */
 
                     internal.unitWidth = w;
                     internal.numVisibleUnits = m;
@@ -697,8 +656,6 @@
                     // sometimes stuff like fonts get loaded as img and cause an infinite loop
                     // combat with a jQuery "one" load per image. Jquery bug? Browser bug?
                     $(this).one('load', function () {
-                        //console.log($(this).attr('src'));
-                        //console.trace();
                         // fire the responsiveUnitSize callback
                         if ($.isFunction(options.responsiveUnitSize)) {
                             _setResponsiveUnitWidth();
@@ -985,9 +942,6 @@
                 touchObject: null
             };
 
-            // console.log(this.options);
-
-
             // --------------------
             // _create MAIN FLOW
             // --------------------
@@ -1203,7 +1157,6 @@
             // $.Widget.prototype.destroy.call(this);
             // For UI 1.9, define _destroy instead and don't worry about calling the base widget
 
-            //console.log('destroyed');
         },
 
 
