@@ -2247,10 +2247,9 @@ jQuery.prototype.wrapInner = function(arg1) {};
 jQuery.widget = function(name, options) {};
 
 /**
- * @constructor
  * @return {!Modernizr}
  */
-function Modernizr() {}
+Modernizr = function() {};
 
 
 /**
