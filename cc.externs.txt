@@ -2245,3 +2245,6 @@ jQuery.prototype.wrapInner = function(arg1) {};
  * @return {jQueryObject}
  */
 jQuery.widget = function(name, options) {};
+
+
+Modernizr.csstransitions
