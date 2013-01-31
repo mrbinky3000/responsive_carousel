@@ -2246,9 +2246,21 @@ jQuery.prototype.wrapInner = function(arg1) {};
  */
 jQuery.widget = function(name, options) {};
 
+/**
+ * @constructor
+ * @return {!Modernizr}
+ */
+function Modernizr() {}
+
 
 /**
  * @type {boolean}
  * @const
  */
 Modernizr.csstransitions
+
+/**
+ * @type {boolean}
+ * @const
+ */
+this.internal.touchObject.destroy();
