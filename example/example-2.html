@@ -92,13 +92,13 @@ $(function () {
     /* a generic product carousel - something that might appear in the body of a e-commerce site. */
     $('#example-2')
         .responsiveCarousel({
-            unitWidth:'compute',
-            target:'#example-2 .slider-target',
-            unitElement:'#example-2 .slider-target > li',
-            mask:'#example-2 .slider-mask',
-            arrowLeft:'#example-2 .arrow-left',
-            arrowRight:'#example-2 .arrow-right',
-            dragEvents:Modernizr.touch,
+            unitWidth:          'compute',
+            target:             '#example-2 .slider-target',
+            unitElement:        '#example-2 .slider-target > li',
+            mask:               '#example-2 .slider-mask',
+            arrowLeft:          '#example-2 .arrow-left',
+            arrowRight:         '#example-2 .arrow-right',
+            dragEvents:         Modernizr.touch,
             responsiveUnitSize:function () {
                 return 1;
             },
