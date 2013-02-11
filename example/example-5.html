@@ -77,7 +77,10 @@
 </div>
 
 <div>
-    <p><span href="#" class="arrow-left"><span>Arrow Left</span></span> | <span class="arrow-right" href="#"><span>Arrow Right</span></span></p>
+    <p>
+        <span class="arrow-left arrow"><span>Arrow Left</span></span> |
+        <span class="arrow-right arrow"><span>Arrow Right</span></span>
+    </p>
 </div>
 </body>
 <script src="lib/jquery.min.js"></script>
@@ -93,10 +96,9 @@
         /* a generic product carousel - something that might appear in the body of a e-commerce site. */
         $('.slider')
                 .responsiveCarousel({
-                    'infinite':     true,
+                    'infinite':     false,
                     'unitWidth' :   'individual',
-                    'dragEvents' :  true,  // uncomment this line and comment the line below if you want mouse drag on regular screens and touch screens
-                    //dragEvents:   Modernizr.touch,  // uncomment this line and comment the line above if you only want touch-enabled screens to have drag functionality.
+                    'dragEvents' :  Modernizr.touch
                 });
 
     });
