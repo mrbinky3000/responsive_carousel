@@ -1,12 +1,10 @@
 #Responsive Carousel
 
-NO LONGER BETA! WOO-HOO!  It's ready for the real world!
-
 A fully responsive carousel [jQuery UI widget](http://jqueryui.com/widget/ "jQuery UI widget documentation") that works on desktop browsers, iPhones, iPads, and even older Androids.* It can be configured to respond to touch events, mouse events, or both.  You can use the left and right arrows and/or use your finger or mouse to swipe the carousel left and right.  The code is currently is in the form of a jQuery UI widget and relies on hammer.js to handle the touch events.
 
 ###Stand-out Features:
 
-- FAST.  Uses css transitions.  Code optimized to use as few redraws as possible.  Always getting faster.
+- FAST.  Uses css transitions.  Code optomized to use as few redraws as possible.  Always getting faster.
 - Continuous infinite scrolling.  Hold down a navigation arrow and keep holding it down. No need to keep clicking or tapping.
 - You can have slide "units" of different widths
 - A callback function that lets you specify the number of units to show at different width
@@ -70,16 +68,14 @@ $.animation() method.
 - ~~Automatic slide show option.  Should be easy enough.~~ DONE!
 - ~~get-able property with the currently left-most visible slide unit~~ DONE!
 - ~~Infinite scroll / slide show  (Buggy beta version available in experimental branch.  Will most likely re-write infinite scroll with new approach.)~~ DONE!
+- ~~slides of different widths~~ DONE!
 
 
 ##Known Bugs
 
 Please report any bugs encountered!  I will fix em'
 
-- ~~Things get weird if a user touches both the left and right scroll arrows at the same time.~~ Seems to be fixed!
-- Sometimes arrows become un responsive if you press them in rapid succession on older iPads / iPhones.  A quick swipe with your finger seems to make the arrows respond again.
-- ~~Including Facebook's "Like" buttons on the same page as the carousel slows the heck out of the carousel on older Droids.  This is because Facebook's javascript is constantly causing the browser to do a repaint every few milliseconds.~~ Seems to be fixed!
-- As of Chrome 18 for mobile, while holding down the arrows for continuous sliding, sometimes the animation stops for some unknown reason.  Chrome is starting their rapid-update schedule for their mobile browser starting in March of 2013, so hopefully this issue goes away. 
+- none so far. Please notify me if some are found
 
 
 ##Config Options
@@ -129,9 +125,9 @@ A css selector representing the child elements of target.  Usually, these are li
 ####unitWidth  (string)
 __You're going to want to set this to 'compute' on responsive sites.__   'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. [See example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) for details.
 
-The default, 'inherit', inherits the width from your current CSS and is best suited for static, non-responsive sites.
+ The default, 'inherit', inherits the width from your current CSS and is best suited for static, non-responsive sites.
 
-There is a new option added in 1.5, 'individual'.  This lets you have list elements of different (read: non-uniform) widths.  I created this so that I could have a horizontally scrolling navigation menu like some native mobile apps do. See example 5 ([Example 5](http://matthewtoledo.com/creations/responsive-carousel/example/example-5.html)
+ There is a new option added in 1.5, 'individual'.  This lets you have list elements of different (read: non-uniform) widths.  I created this so that I could have a horizontally scrolling navigation menu like some native mobile apps do.
 
 ####responsiveUnitSize  (function)
 This is only used if your unitWidth is set to 'compute'.  It is a callback function that should return an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.  Here is an example of usage below.
@@ -142,8 +138,7 @@ This is only used if your unitWidth is set to 'compute'.  It is a callback funct
         winW = $(window).width();
     });
 
-
-   $elem.responsiveCarousel({
+	$elem.responsiveCarousel({
         infinite:       false,
         target:         '.slider-target',
         unitElement:    '.slider-target > li',
@@ -245,7 +240,7 @@ Clean up all event handlers and HTML added by this widget.
 ##Change Log
 
 ### Version 1.5.0 - 2/11/2013
-- SO... MANY... BUGFIXES!  So many that we skipped some version numbers.  Also, this is no longer beta. It's version 1! Woohoo!  It's going to be used extensively on a fortune 500 company's website that I'm working on right now.  This is ready for the world!
+- I had to invest LOTS of time into getting this ready for a major Fortune 500 client.  It's no longer beta.  It's ready for the real world! (It better be, because it's going to be used a lot on that web site)
 
 ### Version 0.5.1 - 1/16/2013
 - Bugfixes with nudgeThreshold option.  It was sometimes skipping a unit, going from 1 to 3 bypassing 2, for example. Fixed now.
