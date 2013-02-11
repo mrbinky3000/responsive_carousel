@@ -5,25 +5,6 @@
     <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0'
           name='viewport'/>
     <title>responsiveCarousel Example - 1</title>
-    <script>
-        /* This is not part of the example!  It's here so I can track any javascript errors that you may encounter and then
-         * fix them.
-         */
-        var _errs = ["502e436e58493efb3d0035e8"];
-        (function (a, b) {
-            a.onerror = function () {
-                _errs.push(arguments)
-            };
-            var d = function () {
-                var a = b.createElement("script"), c = b.getElementsByTagName("script")[0];
-                a.src = "//d15qhc0lu1ghnk.cloudfront.net/beacon.js";
-                a.async = !0;
-                c.parentNode.insertBefore(a, c)
-            };
-            a.addEventListener ? a.addEventListener("load", d, !1) :
-                    a.attachEvent("onload", d)
-        })(window, document);
-    </script>
     <script src="lib/modernizr.min.js" type="text/javascript"></script>
     <link type="text/css" rel="stylesheet" href="example.css" />
     <script type="text/javascript">
@@ -54,13 +35,14 @@
     <span>[ <a href="example-2.html">Example 2</a> ]</span>
     <span>[ <a href="example-3.html">Example 3</a> ]</span>
     <span>[ <a href="example-4.html">Example 4</a> ]</span>
+    <span>[ <a href="example-5.html">Example 4</a> ]</span>
 </p>
 
 <div class="examples" id="example-1">
     <div class="slider">
         <div class="slider-nav">
-            <div class="arrow-left arrow"><span title="Back"></a></div>
-            <div class="arrow-right arrow"><span title="Next"></a></div>
+            <div class="arrow-left arrow"><span title="Back"></span></div>
+            <div class="arrow-right arrow"><span title="Next"></span></div>
         </div>
         <div class="slider-mask-wrap">
             <div class="slider-mask">

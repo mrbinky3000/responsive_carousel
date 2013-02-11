@@ -5,25 +5,6 @@
     <meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0'
           name='viewport'/>
     <title>responsiveCarousel Example - 4</title>
-    <script>
-        /* This is not part of the example!  It's here so I can track any javascript errors that you may encounter and then
-         * fix them.
-         */
-        var _errs = ["502e436e58493efb3d0035e8"];
-        (function (a, b) {
-            a.onerror = function () {
-                _errs.push(arguments)
-            };
-            var d = function () {
-                var a = b.createElement("script"), c = b.getElementsByTagName("script")[0];
-                a.src = "//d15qhc0lu1ghnk.cloudfront.net/beacon.js";
-                a.async = !0;
-                c.parentNode.insertBefore(a, c)
-            };
-            a.addEventListener ? a.addEventListener("load", d, !1) :
-                    a.attachEvent("onload", d)
-        })(window, document);
-    </script>
     <script src="lib/modernizr.min.js" type="text/javascript"></script>
     <link type="text/css" rel="stylesheet" href="example.css"/>
     <script type="text/javascript">
@@ -57,6 +38,7 @@
     <span>[ <a href="example-2.html">Example 2</a> ]</span>
     <span>[ <a href="example-3.html">Example 3</a> ]</span>
     <span>[ <a href="example-4.html">Example 4</a> ]</span>
+    <span>[ <a href="example-5.html">Example 5</a> ]</span>
 </p>
 
 <div class="examples" id="example-4">
@@ -133,30 +115,29 @@
         /* a generic product carousel - something that might appear in the body of a e-commerce site. */
         $('#example-4')
             .responsiveCarousel({
-                infinite: true,
-                unitWidth:'compute',
-                dragEvents: true, // uncomment this line and comment the line below if you want mouse drag on regular screens and touch screens
-                //dragEvents: Modernizr.touch,  // uncomment this line and comment the line above if you only want touch-enabled screens to have drag functionality.
+                infinite:       true,
+                unitWidth:      'compute',
+                target:         '#example-4 .slider-target',
+                unitElement:    '#example-4 .slider-target > li',
+                mask:           '#example-4 .slider-mask',
+                arrowLeft:      '#example-4 .arrow-left',
+                arrowRight:     '#example-4 .arrow-right',
+                dragEvents:     true, // you can drag with your finger on touch, or with mouse on desktop
                 responsiveUnitSize: function () {
                     return 2;
                 },
                 step: -1,
                 onShift: function (i) {
-                    i = Math.round(i);
                     var $current = $('#selector li a[rel=frame_' + i + ']');
                     $('#selector li a').removeClass('current');
                     $current.addClass('current');
-                },
-                onRedraw: function () {
-                    // optional callback that is called after the slider is done adjusting to a new window width.  You can
-                    // perform all sorts of cleanup here if you wish.  See my makeSameHeight jQuery plugin on github!
                 }
             });
 
         /* this next part toggles the "auto slide show" option. */
         $('#toggle-slide-show').on('click', function (ev) {
             ev.preventDefault();
-            $('#example-2').responsiveCarousel('toggleSlideShow');
+            $('#example-4').responsiveCarousel('toggleSlideShow');
         });
 
         /* this lets us jump to a slide */

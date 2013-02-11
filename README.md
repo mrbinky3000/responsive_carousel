@@ -1,6 +1,19 @@
 #Responsive Carousel
 
+NO LONGER BETA! WOO-HOO!  It's ready for the real world!
+
 A fully responsive carousel [jQuery UI widget](http://jqueryui.com/widget/ "jQuery UI widget documentation") that works on desktop browsers, iPhones, iPads, and even older Androids.* It can be configured to respond to touch events, mouse events, or both.  You can use the left and right arrows and/or use your finger or mouse to swipe the carousel left and right.  The code is currently is in the form of a jQuery UI widget and relies on hammer.js to handle the touch events.
+
+###Stand-out Features:
+
+- FAST.  Uses css transitions.  Code optimized to use as few redraws as possible.  Always getting faster.
+- Continuous infinite scrolling.  Hold down a navigation arrow and keep holding it down. No need to keep clicking or tapping.
+- You can have slide "units" of different widths
+- A callback function that lets you specify the number of units to show at different width
+- Loose HTML. This doesn't force you to use certain HTML structures.  Your navigation can be anywhere in the DOM.
+
+
+
 
 You don't need all of jQuery UI or any of the theme assets (images, css, etc). All you need is the jQuery UI core and the widget factory.  Here is a [link](http://jqueryui.com/download/#themeParams=none&zComponents=5d000001005702000000000000003d8889a73445cfa2549752eb7d5b0fde05c98ebf91d7c7d9c45fea7207439222bfdeef8f217649db6e5aea9e164adfe948b6de7623420184c14e9dc8d7d811a9c755a71664e483f3459d92b441d01744f148ef2cc79f5870e3311a9e94d1e42f9b0cad1022ed5169c595ea345a6afcc38b75ce0586a3496e04001d04b0690257fd1cbb11395fd272cb91887639ea5f9f9b23259ee98fdaa0b3949c67f9028bb471dbc04c14d875384b78a68872ab02462330b6265c29802a99ddb915c78cafd3be102e26c7193ae335a4109f5f269618a9f0ffe5690f75 "jQuery UI with min needed options") to the download page with the minimum jQuery UI options checked for you. [LINK](http://jqueryui.com/download/#themeParams=none&zComponents=5d000001005702000000000000003d8889a73445cfa2549752eb7d5b0fde05c98ebf91d7c7d9c45fea7207439222bfdeef8f217649db6e5aea9e164adfe948b6de7623420184c14e9dc8d7d811a9c755a71664e483f3459d92b441d01744f148ef2cc79f5870e3311a9e94d1e42f9b0cad1022ed5169c595ea345a6afcc38b75ce0586a3496e04001d04b0690257fd1cbb11395fd272cb91887639ea5f9f9b23259ee98fdaa0b3949c67f9028bb471dbc04c14d875384b78a68872ab02462330b6265c29802a99ddb915c78cafd3be102e26c7193ae335a4109f5f269618a9f0ffe5690f75 "jQuery UI with min required options.")
 
@@ -94,28 +107,70 @@ Here are the default options:
         },
 
 ####arrowLeft  (string)
-A css selector representing the left arrow.  Hint:  you can make this a specific anchor tag, or have several elements on a page that scroll the carousel to the left.
+A css selector representing the left arrow.  NOTE: This should be a span or other element instead of an anchor tag.  Our responsiveCarousel script lets you hold down
+the arrow buttons for continuous scrolling.  If the arrows are anchor tags, Android devices will prompt you to save the target URL for the anchor. It's impossible to turn this "feature" off.
+Don't make the arrows anchors or buttons.  I recommend div or span elements. the script will attach the correct event listeners.  You just need to add
+css so when the mouse hovers over your arrow element, it gets the same pointer as an anchor tag.
+
+Your arrow tags can be ANYWHERE on the page.  They do not need to be child elements.  You can also set your select in such a way that you can have multiple buttons that control the slider.
 
 ####arrowRight (string)
-A css selector representing the right arrow.
+See above.
 
 ####target (string)
-A css selector representing the actual DOM element that will slide behind the masking dom element.  Usually an unordered list containing list elements. This must be a child element of the carousel.
+A css selector representing the actual DOM element that will slide behind the masking dom element.  Usually this is an unordered list containing list elements. Do not give CSS borders, margin, or padding to the target.
 
 ####mask (string)
-A css selector representing the immediate parent of the the target element.  This element is set to overflow hidden and helps us give the illusion of a horizontal scroll. This must be a child element of the carousel.
+A css selector representing the immediate parent of the the target element.  This element is set to overflow hidden and helps us give the illusion of a horizontal scroll. Do not give the mask CSS borders, margins or padding.
 
 ####unitElement  (string)
-A css selector representing the child elements of target.  Usually, these are list elements.  CSS NOTE: Do not apply border, margin, or padding to these elements.
+A css selector representing the child elements of target.  Usually, these are list elements.  Do not apply border, margin, or padding to these elements. If you need spacing, add div's inside the unitElement and apply borders, padding, and margins to the div.
 
 ####unitWidth  (string)
-__You're going to want to set this to 'compute' on responsive sites.__   The default, 'inherit', inherits the width from your current CSS and is best suited for static sites. 'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. [See example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) for details.
+__You're going to want to set this to 'compute' on responsive sites.__   'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. [See example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) for details.
+
+The default, 'inherit', inherits the width from your current CSS and is best suited for static, non-responsive sites.
+
+There is a new option added in 1.5, 'individual'.  This lets you have list elements of different (read: non-uniform) widths.  I created this so that I could have a horizontally scrolling navigation menu like some native mobile apps do. See example 5 ([Example 5](http://matthewtoledo.com/creations/responsive-carousel/example/example-5.html)
 
 ####responsiveUnitSize  (function)
-A callback function that returns an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.
+This is only used if your unitWidth is set to 'compute'.  It is a callback function that should return an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.  Here is an example of usage below.
+
+    var winW;
+
+    $(window).on('resize',function(){
+        winW = $(window).width();
+    });
+
+
+   $elem.responsiveCarousel({
+        infinite:       false,
+        target:         '.slider-target',
+        unitElement:    '.slider-target > li',
+        mask:           '.slider-mask',
+        arrowLeft:      '.arrow-left',
+        arrowRight:     '.arrow-right',
+        unitWidth:      'compute',
+
+        dragEvents: Modernizr.touch,
+        responsiveUnitSize: function () {
+            var i = 4;
+            if ( winW < 800 ) { i = 3; }
+            if ( winW < 600 ) { i = 2; }
+            if ( winW < 400 ) { i = 1; }
+            return i;
+        }
+    });
+
 
 ####onRedraw  (function)
 A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html))
+
+####ondragstart (function)
+A callback function that is fired when dragging starts.
+
+####ondragend (function)
+A callback function that is fired when dragging ends.
 
 ####dragEvents (boolean)
 true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch returns true/false.
@@ -125,6 +180,9 @@ Number milliseconds it takes to scroll one unitWidth to the left or right when y
 
 ####slideSpeed  (integer)
 Number of milliseconds to pause on each slide in a slideshow.
+
+####onShift (function)
+A function that is called each time the slider shifts to the left or right.
 
 ####step (integer)
 How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
@@ -144,7 +202,8 @@ The minimum amount of pixels the user must drag the target before we force a sli
 ####infinite (boolean)
 Set this to true to have infinite scrolling. This means when you reach the ends of carousel, the carousel starts over again.  Hint: Combine infinite with toggleSlideShow() to have an infinite slide show. See [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html "Example 2") and [Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html "Example 4")
 
-
+####delta
+A force-multiplier for dragging slides, like a lever. The larger the number, the faster your slider will slide to the left or right when dragging.
 
 
 ## Methods
@@ -153,19 +212,31 @@ Since this is a jQuery UI widget, you can call these public methods like so:
 
 	$([CSS Selector]).responsiveCarousel('[method name]', [arguments]);
 
+####startSlideShow()
+Starts up the slide show.
+
+####stopSlideShow()
+Derrrrrr. Stops the slide show.
+
 ####toggleSlideShow()
-Call to activate the slide show. Call again to deactivate. You might want a button or anchor tag someplace to turn on the slide show, or add it to a dom-ready event for an auto-start feature. Example of usage:
+Starts / stops the slide show. You might want a button or anchor tag someplace to turn on the slide show, or add it to a dom-ready event for an auto-start feature. Example of usage:
 
 	$('#example-2').responsiveCarousel('toggleSlideShow');
 
 ####redraw()
-Force a redraw of the carousel.
+Force a redraw of the carousel.  THIS IS HANDY IF YOUR CAROUSEL WAS HIDDEN.  Elements that are hidden on page load have no dimensions.  You will need to call redraw once they become visible.  Example of usage:
+
+    $('.some-button').toggle('#slider-wrap');
+    if ($('#slider-wrap').is(':visible')) {
+        $('#example-2').responsiveCarousel('redraw');
+    }
 
 ####goToSlide(i,a)
 Jump to slide i (numbering starts at zero). Set "a" to true to use animation. Set "a" to false to just jump to the slide without animation.  If you leave out "a", it defaults to true.
 
 ####destroy()
-Clean up all event handlers and HTML added by this widget. 
+Clean up all event handlers and HTML added by this widget.
+
 
 
 
@@ -173,7 +244,10 @@ Clean up all event handlers and HTML added by this widget.
 
 ##Change Log
 
-### Version 0.5.1 -/16/2013
+### Version 1.5.0 - 2/11/2013
+- SO... MANY... BUGFIXES!  So many that we skipped some version numbers.  Also, this is no longer beta. It's version 1! Woohoo!  It's going to be used extensively on a fortune 500 company's website that I'm working on right now.  This is ready for the world!
+
+### Version 0.5.1 - 1/16/2013
 - Bugfixes with nudgeThreshold option.  It was sometimes skipping a unit, going from 1 to 3 bypassing 2, for example. Fixed now.
 
 #### Version 0.5.0 - 1/15/2013

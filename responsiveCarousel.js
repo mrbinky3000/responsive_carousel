@@ -31,23 +31,21 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 1.0.1
- * @releaseDate 1/31/2013
+ * @version 1.5.0
+ * @releaseDate 2/11/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
  * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
  */
 (function ($, window, document) {
     "use strict";
-    var busy = false;
 
-
+    var instanceCount = 0;
 
     $.widget("ri.responsiveCarousel", {
 
-        //Options to be used as defaults
+        // default options for every instance of the widget
         options: {
-            autoWrap: false,
             arrowLeft: '.arrow-left span',
             arrowRight: '.arrow-right span',
             mask: '.slider-mask',
@@ -59,6 +57,7 @@
             ondragstart: null,
             ondragend: null,
             dragEvents: false,
+            easing: 'linear',
 			speed: 400,
 			slideSpeed: 2500,
 			step: -1,
@@ -69,23 +68,6 @@
             infinite: false,
             delta: 1
         },
-
-        // Execute a callback only after a series of events are done being triggered.
-        // prevents runaway conditions (like during a window resize)
-        wait: function () {
-            var t, _d = function (callback, ms) {
-                if (undefined !== t) {
-                    window.clearTimeout(t);
-                }
-                t = window.setTimeout(callback, ms);
-            };
-            return {
-                thenDo : function (callback, ms) {
-                    _d(callback, ms);
-                }
-            };
-        },
-
 
         /**
          * Automatically add the correct vendor specific prefix for a css property if there is no native support.
@@ -118,19 +100,41 @@
 
         },
 
+
+        /**
+         * Rounds the number X to the nearest interval of internal.unitWidth.
+         *
+         * Only if options.unitWidth !== 'individual'
+         *
+         * Some browsers seem dead set on providing fractions of pixels when using jQuery's $.position()
+         * method.  It could be a browser peculiarity or just a side-effect of JavaScript's  weird
+         * handling of floating numbers.  Either way, this function fixes that by always providing us
+         * with whole number multiple of the unitWidth.  It's great for figuring out the "left" of the
+         * slider target so that the slider doesn't slide past the left or right boundaries.
+         *
+         * @param x number
+         * @return x number
+         * @private
+         */
+        _round: function (x) {
+            // round x to the nearest interval of internal.unitWidth
+            if (this.options.unitWidth === 'compute' || this.options.unitWidth === 'inherit' || this.options.unitWidth === 'integer') {
+                x = Math.round( x / this.internal.unitWidth) * this.internal.unitWidth;
+            }
+            return x;
+        },
+
         /**
          * A proxy function that should be called to animate stuff instead of using jQuery's $.animate() function.
          * If the user's browser supports CSS3 Transitions, we use them since they are faster.  If they don't support
          * Transitions, we jQuery's default $.animate() method which is fast on newer computers, but slower on some
          * under-powered mobile devices.  $.animate() also causes page reflows, which we are trying to avoid.
          *
-         * TODO:  make this support more than one type of easing.
-         *
          * @param $target
          * @param props object The css attributes to animate
          * @param speed integer Speed in milliseconds
-         * @param callback function A function to call after the animateion is done
-         * @return {*} This is chainable.
+         * @param callback function A function to call after the animation is done
+         * @return {*} This is chain-able.
          * @private
          */
         _animate: function ($target, props, speed, callback) {
@@ -138,10 +142,17 @@
             var options = this.options,
                 internal = this.internal,
                 transition = internal.prefix + 'transition',
-                currentLeft = $target.position().left,
+                currentLeft = this._round(Math.floor($target.position().left)),
                 newLeft = props.left,
                 diff = currentLeft + newLeft,
-                i;
+                i,
+
+                _transition = function(o) {
+                    $target.css(o);
+                };
+
+
+
 
             // options for seamless looping
             if (options.infinite === true) {
@@ -152,7 +163,7 @@
                         i = internal.unitWidth * (internal.numUnits - internal.numVisibleUnits) * -1;
                         if (currentLeft === i) {
                             // Yes! Jump to start of carousel first
-                            $target.css({
+                            _transition({
                                 transition : '',
                                 'left' : 0
                             });
@@ -164,8 +175,8 @@
                         // Is current left at 0?
                         if (currentLeft === 0 ) {
                             // Yes! Jump to the start of the clones
-                            i = $target.find('.clone:first').position().left * -1;
-                            $target.css({
+                            i = Math.floor($target.find('.clone:first').position().left) * -1;
+                            _transition({
                                 transition : '',
                                 'left' : i
                             });
@@ -176,16 +187,15 @@
                 }
             }
 
-
-            // stupid hack! For some reason, if this was not delayed, the code above for jumping to particular spots if
-            // infinite scrolling was enabled, would not work.  The transition below was being applied even though the
-            // jumps on line 183, and 197 occur way before the one on 214.  Have NO IDEA why.  So, 1 ms delay fixed it.
+            // stupid hack! For some reason, if the code below is not delayed the transitions bellow occur BEFORE
+            // the code above where transitions are turned off and the slider jumps to the start of the clones
+            // or to the start of the slider.  I think it has to do with how browsers render CSS that originates in JS.
             window.setTimeout(function () {
                 if (options.cssAnimations) {
-                    $target.css(transition, 'all ' + speed / 1000 + 's ease-in-out').css(props);
+                    _transition($.extend({transition :  'left ' + speed / 1000 + 's ' + options.easing }, props));
                     window.setTimeout(function () {
                         // execute a the supplied callback (if any) that was given to _animate
-                        $target.css(transition, '');
+                        _transition({transition :  ''});
                         if ($.isFunction(callback)) {
                             callback();
                         }
@@ -197,9 +207,7 @@
                         }
                     });
                 }
-
-            },1);
-
+           } ,1); // set to 1 millisecond, but will most likely be "animation frame" or about 10ms
         },
 
         /**
@@ -217,7 +225,7 @@
                 $el = $(this.element),
                 $target = $(options.target);
 
-            caller = ' ' + caller; // shut up jsLint
+            caller = ' ' + caller; // shut up jsLint console.log this to see which function called it. (or use trace)
             internal.numUnits = $(options.unitElement).length;
 
             // if we are doing individual widths, then loop through all the unitElements and
@@ -227,18 +235,26 @@
                 $(options.unitElement).each(function(){
                     var $this = $(this),
                         width = 0;
-                    $this.css('width',''); // clear any previous width that we set.
-                    // get rid of any sub-pixels. Only whole numbers please
-                    width = Math.ceil($this.width()) + 1;  // +1 is because IE9 SUCKS!!!!!!!!!!
+
+                    // clear any previous width that we set.  Let the browser re-draw naturally.
+                    $this.css('width','');
+
+                    // get rid of any sub-pixels. Only whole numbers please.  Some browsers have sub pixels
+                    // even though we set stuff to whole numbers.  Might have to do with borders or
+                    // padding, not sure.  Don't care.
+                    width = Math.ceil($this.width()) + 1;  // +1px is because IE9 SUCKS!!!!!!!!!!
                     $this.width(width);
-                    // add the whole number to the total
+
+                    // add the whole number width to the running width total
                     internal.targetWidth = internal.targetWidth + width;
+
+                    // store all this in a data
                     $(this).data("responsiveCarousel",{
                         'width' : width,
-                        'top' : $this.position().top,
-                        'right' : $this.position().left + $this.outerWidth(),
-                        'bottom' : $this.position().top + $this.outerHeight(),
-                        'left' : $this.position().left
+                        'top' : Math.floor($this.position().top),
+                        'right' : Math.floor($this.position().left) + $this.width(),
+                        'bottom' : Math.floor($this.position().top) + $this.height(),
+                        'left' : Math.floor($this.position().left)
                     });
                 });
             }
@@ -248,18 +264,11 @@
                 internal.targetWidth =  internal.numUnits * internal.unitWidth;
             }
 
+            $(options.target).width(internal.targetWidth); // target width (no border or padding)
+            internal.targetHeight = $(options.target).height();
+            internal.maskWidth = $(options.mask).width();
+            internal.maskHeight = $(options.mask).height();
 
-
-            $(options.target).width(internal.targetWidth);
-            internal.targetOuterWidth = $target.outerWidth();
-            internal.targetOuterHeight = $target.outerHeight();
-            internal.targetParentOuterWidth = $target.parent().outerWidth();
-            internal.targetParentInnerWidth = $target.parent().innerWidth();
-            internal.targetParentOuterHeight = $target.parent().outerHeight();
-            internal.targetParentMarginLeft = parseInt($target.parents().css('marginLeft'), 10);
-            if (isNaN(internal.targetParentMarginLeft)) {
-                internal.targetParentMarginLeft = 0;
-            }
         },
 
         /**
@@ -268,19 +277,18 @@
          * @private
          * @return void
          */
-        _setArrowVisibility: function () {
+        _setArrowVisibility: function (s) {
 
             var options = this.options,
                 internal = this.internal,
                 $target = $(options.target),
-                currentLeft  = $target.position().left,
-                currentRight = internal.targetOuterWidth + currentLeft,
                 $arrowLeft = $(options.arrowLeft),
                 $arrowRight = $(options.arrowRight),
                 maskLeft = 0,
-                maskRight = internal.targetParentOuterWidth,
-                p;
-
+                p,
+                maskRight = internal.maskWidth,
+                currentLeft  = this._round(Math.floor($target.position().left)), // position does not include for margin & border of parent
+                currentRight = internal.targetWidth + currentLeft;
 
 			// right arrow
             if ($arrowRight.length) {
@@ -323,7 +331,6 @@
                 for (var i = 0; i < internal.numUnits; i++) {
                     p = $(options.unitElement).eq(i);
 
-                    // todo, this loop gets slow for really long lists. We should come up with a way to cache internal.currentSlide
                     if (Math.abs(currentLeft) >= p.data('responsiveCarousel').left && Math.abs(currentLeft) < p.data('responsiveCarousel').right ) {
                         internal.currentSlide = p.data('slide');
                         break;
@@ -338,6 +345,9 @@
 				options.onShift(internal.currentSlide);
 			}
 
+            // be nice to lazy loading
+            $(options.target).find('img').trigger('appear');
+
         },
 
 
@@ -350,10 +360,10 @@
                 internal.isArrowBeingClicked  = false;
                 window.clearInterval(internal.timer);
             }
-            if (false === busy) {
-                busy = true;
+            if (false === internal.busy) {
+                internal.busy = true;
                 this._animate($target, {left: this.computeAdjust($target) }, options.speed, function () {
-                    busy = false;
+                    internal.busy = false;
                 });
             }
         },
@@ -369,11 +379,10 @@
                 internal = this.internal,
                 options = this.options,
                 $target = $(options.target),
-                currLeft = $target.position().left,
-                parentLeftOffset = internal.targetParentMarginLeft, // make sure slider-mask has "position: relative" in the CSS!  If your carousel acts wierd, this could be it.
+                currLeft = Math.floor($target.position().left),
                 newLeft;
 
-            if (busy === true) {
+            if (internal.busy === true) {
                 return;
             }
 
@@ -397,24 +406,27 @@
                 }
 
             } else {
+
                 // all other unit width types (integer, compute, inherit) are uniform widths
                 if (direction === "left") {
-                    newLeft =  currLeft - parentLeftOffset + internal.unitWidth;
+                    newLeft =  currLeft  + internal.unitWidth;
                 } else if (direction === "right") {
-                    newLeft =  currLeft - parentLeftOffset - internal.unitWidth;
+                    newLeft =  currLeft - internal.unitWidth;
                 } else {
                     throw new Error("unknown direction");
                 }
 
             }
 
-
+            // for some stupid reason, some browsers want to add sub-pixel sizes even though absolutely
+            // everything is whole numbers.  Math floor it!
+            newLeft = Math.floor(newLeft);
 
             // do the animation here
-            busy = true;
+            internal.busy = true;
             this._animate($target, {left: newLeft}, options.speed, function () {
                 that._setArrowVisibility();
-                busy = false;
+                internal.busy = false;
             });
 
         },
@@ -435,29 +447,36 @@
                 eventStringUp = "";
 
             // discard click on left arrow
-            $arrowLeft.on('click.responsiveCarousel', function (ev) {
+            $arrowLeft.on('click' + this.instanceId, function (ev) {
                 ev.preventDefault();
             });
 
             // discard click on right arrow
-            $arrowRight.on('click.responsiveCarousel', function (ev) {
+            $arrowRight.on('click' + this.instanceId, function (ev) {
                 ev.preventDefault();
             });
 
             // type of events depend on touch or not.
             if (options.dragEvents === true) {
-                eventStringDown = 'mousedown.responsiveCarousel touchstart.responsiveCarousel';
-                eventStringUp = 'mouseup.responsiveCarousel mouseout.responsiveCarousel mouseleave.responsiveCarousel touchend.responsiveCarousel touchleave.responsiveCarousel';
+                eventStringDown = 'mousedown' + this.instanceId +
+                    ' touchstart' + this.instanceId;
+                eventStringUp = 'mouseup' + this.instanceId +
+                    ' mouseout' + this.instanceId +
+                    ' mouseleave' + this.instanceId +
+                    ' touchend' + this.instanceId +
+                    ' touchleave' + this.instanceId;
             } else {
-                eventStringDown = 'mousedown.responsiveCarousel';
-                eventStringUp = 'mouseup.responsiveCarousel mouseout.responsiveCarousel mouseleave.responsiveCarouse';
+                eventStringDown = 'mousedown' + this.instanceId;
+                eventStringUp = 'mouseup' + this.instanceId +
+                    ' mouseout' + this.instanceId +
+                    ' mouseleave' + this.instanceId;
             }
 
             // left arrow, move left
             $arrowLeft.on(eventStringDown, function (ev) {
                 ev.preventDefault();
                 ev.stopPropagation();
-                if (busy === false && !$arrowLeft.hasClass('disabled')) {
+                if (internal.busy === false && !$arrowLeft.hasClass('disabled')) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () {that._doArrowBeingClicked('left'); }, 10);
                     if (internal.slideTimer) {
@@ -472,7 +491,7 @@
             $arrowRight.on(eventStringDown, function (ev) {
                 ev.preventDefault();
                 ev.stopPropagation();
-                if (busy === false && !$arrowRight.hasClass('disabled')) {
+                if (internal.busy === false && !$arrowRight.hasClass('disabled')) {
                     internal.isArrowBeingClicked = internal.firstMouseClick = true;
                     internal.timer = window.setInterval(function () {that._doArrowBeingClicked('right'); }, 10);
 					if (internal.slideTimer) {
@@ -492,7 +511,7 @@
             });
 
             // Other fringe events that require a cancel of an arrow touch event.
-            $(window).on('scroll.responsiveCarousel resize.responsiveCarousel onorientationchange.responsiveCarousel', function(){
+            $(window).on('scroll' + this.instanceId +' resize' + this.instanceId +' onorientationchange' + this.instanceId, function(){
                 that._clearInterval();
             });
 
@@ -537,29 +556,31 @@
                 $el = $(this.element),
                 $units = $(options.unitElement + ':not(.clone)'),
                 $firstUnit = $units.eq(0),
-                delay = new this.wait(),
+                delay,
 
 
 
                 _importWidthFromDOM = function () {
-                    internal.unitWidth = $firstUnit.outerWidth();
+                    internal.unitWidth = $firstUnit.width();  // make sure your unitElements (LI) don't have margin, padding, or border set in CSS!
                 },
 
                 _setResponsiveUnitWidth = function () {
-                    var maskInnerWidth = $(options.mask).innerWidth();
+                    var maskWidth = $(options.mask).width();
                     m = options.responsiveUnitSize($el, internal, options);
                     if ('number' !== typeof m || m < 1) {
                         throw new Error("The responsiveUnitSize callback must return a whole number greater than 0");
                     }
-                    w = maskInnerWidth / m;
+                    w = maskWidth / m;
                     w = Math.floor(w);
                     $(options.unitElement).css('width', w);
 
                     // if we have infinite scrolling, add clones to the front and back of our our list. to give the illusion of infinite scrolling
                     if (options.infinite === true && m > 0 && m !== internal.numVisibleUnits) {
                         internal.numVisibleUnits = m;
+
                         // clear all the old clones, make way for the new clones.
                         $target.find('.clone').remove();
+
                         // make new clones
                         $units.slice(0,internal.numVisibleUnits).clone(true).addClass('clone').appendTo($target);
                     }
@@ -580,7 +601,7 @@
                 // can cause the widths to change as the page is updated. To counter
                 // this, we'll re-run _importWidthFromDom after each image load in the
                 // target or it's child elements.
-                $target.find('img').on('load.responsiveCarousel', function () {
+                $target.find('img').one('load' + that.instanceId, function () {
                     // fire the responsiveUnitSize callback
                     _importWidthFromDOM();
                     that._setTargetWidth('inherit');
@@ -594,6 +615,7 @@
 
             } else if (options.unitWidth === 'individual') {
 
+
                 // first visit to the page
                 if ($.isFunction(options.onRedraw)) {
                     options.onRedraw($el, internal, options);
@@ -603,7 +625,7 @@
                 // can cause the widths to change as the page is updated. To counter
                 // this, we'll re-run _setTargetWidth() after each image load in the
                 // target or it's child elements.
-                $target.find('img').one('load', function () {
+                $target.find('img').one('load' + that.instanceId, function () {
                     that._setTargetWidth('individual');
                     that._setArrowVisibility();
                     if ($.isFunction(options.onRedraw)) {
@@ -611,12 +633,11 @@
                     }
                 });
 
-                // re-import the width every time the page is re-sized.
-                $(window).on('resize.responsiveCarousel', function () {
-                    delay.thenDo(function () {
+                // re-import the width every time the page is re-sized
+                $(window).on('resize' + that.instanceId, function () {
+                    clearTimeout(delay);
+                    delay = setTimeout(function(){
                         var adjust;
-
-                        that._setUnitWidth();
 
                         that._setTargetWidth('individual (window resize)');
 
@@ -632,7 +653,7 @@
                             options.onRedraw($el, internal, options);
                         }
 
-                    }, 1000);  // if carousel acts weird, increase this number, your page is huge!
+                    }, 400);  // if carousel acts weird, increase this number, your page is huge!
                 });
 
             } else if (options.unitWidth === 'compute') {
@@ -655,7 +676,7 @@
                 $target.find('img').each(function(){
                     // sometimes stuff like fonts get loaded as img and cause an infinite loop
                     // combat with a jQuery "one" load per image. Jquery bug? Browser bug?
-                    $(this).one('load', function () {
+                    $(this).one('load' + that.instanceId, function () {
                         // fire the responsiveUnitSize callback
                         if ($.isFunction(options.responsiveUnitSize)) {
                             _setResponsiveUnitWidth();
@@ -670,17 +691,16 @@
 
                 });
 
-
                 // re-import the width every time the page is re-sized.
-                $(window).on('resize.responsiveCarousel', function () {
-                    delay.thenDo(function () {
+                $(window).on('resize' + that.instanceId, function () {
+
+                    clearTimeout(delay);
+                    delay = setTimeout(function(){
                         var adjust;
 
-                        that._setUnitWidth();
-
-                        // fire the responsiveUnitSize callback
                         if ($.isFunction(options.responsiveUnitSize)) {
                             _setResponsiveUnitWidth();
+                            _importWidthFromDOM();
                         }
 
                         // get the new width from the dom and store internally
@@ -690,6 +710,11 @@
                         // keep the left-most fully visible object prior to the resize
                         // in the left-most slot after the resize
                         adjust = internal.currentSlide * -1 * internal.unitWidth;
+                        // but don't go too far left! Fill in new space to the right.
+                        if (adjust < ( -1 * internal.maskWidth)) {
+                            adjust = internal.maskWidth - internal.targetWidth;
+                        }
+
 
 
                         // if we are not animating a transition, update the scroll arrows
@@ -700,7 +725,7 @@
                             options.onRedraw($el, internal, options);
                         }
 
-                    }, 1000); // if carousel acts weird, increase this number, your page is huge!
+                    }, 400); // if carousel acts weird, increase this number, your page is huge!
                 });
 
 
@@ -723,7 +748,7 @@
                 options = this.options,
                 internal = this.internal,
                 $target = $(options.target),
-                $mask = $target.parent(),
+                $mask = $(options.mask),
                 content = $target,
                 hammer = new Hammer($mask.get(0), {
                     drag: true,
@@ -738,7 +763,7 @@
                 scroll_start = {},
                 scroll_dim = {},
                 content_dim = {},
-                delay = new this.wait(),
+                delay,
 
                 getScrollPosition = function () {
                     var o = {
@@ -752,23 +777,26 @@
 
             hammer.ondragstart = function () {
 
-                if (true === internal.isArrowBeingClicked || true === busy) {
+                if (true === internal.isArrowBeingClicked || true === internal.busy) {
                     // prevent jitters due to fat fingers touching scroll arrow and carousel at same time.
                     // if we're already busy, ignore
                     return {};
                 }
 
-                busy = true;
+                // stop the slide show if any
+                that.stopSlideShow();
+
+                internal.busy = true;
 
                 scroll_start = getScrollPosition();
                 scroll_start.time = new Date().getTime();
                 scroll_dim = {
-                    width: internal.targetParentOuterWidth,
-                    height: internal.targetParentOuterHeight
+                    width: internal.maskWidth,
+                    height: internal.maskHeight
                 };
                 content_dim = {
-                    width: internal.targetOuterWidth,
-                    height: internal.targetOuterHeight
+                    width: internal.targetWidth,
+                    height: internal.targetHeight
                 };
 
                 // copy the scroll start position to internal storage so computeAdjust() can reference it when
@@ -784,8 +812,9 @@
 
                 // insurance just in case the dragend event does not fire due to a very quick touch
                 // combined with a very slow device
-                delay.thenDo(function(){
-                    if (busy === true) {
+                clearTimeout(delay);
+                delay = setTimeout(function(){
+                    if (internal.busy === true) {
                         //$('.log').prepend('backup dragend trigger</br>');
                         hammer.ondragend();
                     }
@@ -844,7 +873,7 @@
                 $target.stop(true, false);
                 that._animate($target, {left: that.computeAdjust($target)}, options.speed, function () {
                     that._setArrowVisibility();
-                    busy = false;
+                    internal.busy = false;
                     if ($.isFunction(options.ondragend)) {
                         options.ondragend(options, internal);
                     }
@@ -854,42 +883,6 @@
 
         },
 
-        /**
-         * Not used yet. Here for next feature: drag momentum
-         * @url http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-         * @url https://gist.github.com/1579671
-         * @private
-         */
-        _initAnimationFrame: function() {
-            var lastTime = 0;
-            var vendors = ['ms', 'moz', 'webkit', 'o'];
-            for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-                window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame']
-                    || window[vendors[x] + 'CancelRequestAnimationFrame'];
-            }
-
-            if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function (callback, element) {
-                    var currTime = new Date().getTime();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function () {
-                            callback(currTime + timeToCall);
-                        },
-                        timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
-            }
-
-
-            if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function (id) {
-                    clearTimeout(id);
-                };
-            }
-
-        },
 
         /**
          * Setup widget (eg. element creation, apply theming, bind events etc.)
@@ -905,24 +898,25 @@
             // The options defined above can be accessed
             // via this.options this.element.addStuff();
 
-
+            instanceCount = instanceCount + 1;
 
             var options = this.options,
                 $el = $(this.element),
                 $target = $(options.target);
 
+            // unique instance for events
+            this.instanceId = '.carousel_' + instanceCount.toString(10);
+
             // a place to store internal vars used only by this instance of the widget
             this.internal = {
+                busy: false,
                 currentSlide: 0,
                 left: 0,
                 targetWidth: 0,
+                targetHeight: 0,
+                maskWidth: 0,
+                maskHeight: 0,
                 unitWidth: 0,
-                targetOuterWidth: 0,
-                targetOuterHeight: 0,
-                targetParentOuterWidth: 0,
-                targetParentInnerWidth: 0,
-                targetParentOuterHeight: 0,
-                targetParentMarginLeft: 0,
                 targetBackupCopy: null,
                 isArrowBeingClicked: false,
                 arrowLeftVisible: true,  // when page first loads, both arrows are visible until _setArrowVisibility() called
@@ -945,8 +939,7 @@
             // --------------------
             // _create MAIN FLOW
             // --------------------
-            // shim our browser with requestAnimationFrame support
-            this._initAnimationFrame();
+
             // backup original target element
             this.internal.targetBackupCopy = this.element;
             // if we are using css3 animations, determine the browser specific prefix (-ie,-moz,-webkit, etc)
@@ -993,7 +986,9 @@
                 options = this.options,
                 $el = $(this.element);
 
-            this._setUnitWidth();
+            if (this.unitWidth === undefined) {
+                this._setUnitWidth();
+            }
             this._setTargetWidth('_redraw');
             this._setArrowVisibility();
             if ($.isFunction(this.options.onRedraw)) {
@@ -1023,16 +1018,19 @@
 
             a = (a !== undefined) ? a : true;
 
-			this._setUnitWidth();
+            if (this.unitWidth === undefined){
+                this._setUnitWidth();
+            }
+
             if (options.unitWidth === 'individual') {
                 newLeft = $(options.unitElement).eq(i).data("responsiveCarousel").left;
             } else {
                 newLeft = i * internal.unitWidth * -1;
             }
-			busy = true;
+			internal.busy = true;
             if (a === true) {
                 this._animate($target, {'left': newLeft}, options.speed, function () {
-                    busy = false;
+                    internal.busy = false;
                     that._setArrowVisibility();
                 });
             } else {
@@ -1047,79 +1045,90 @@
 		toggleSlideShow: function () {
 
 
-			var that = this,
-				internal = this.internal,
-				options = this.options,
-				$target = $(options.target),
-
-
-                _stopSlideShow = function () {
-                    if (true === internal.slideShowActive) {
-                        internal.slideShowActive = false;
-                        window.clearInterval(internal.slideTimer);
-                    }
-                },
-
-                _step = function (i) {
-                    var width = internal.targetParentInnerWidth,
-                        left = $target.position().left,
-                        right = left + internal.targetWidth,
-                        newLeft = left + i * internal.unitWidth,
-                        newRight = right + i * internal.unitWidth,
-                        adjustedLeft = newLeft;
-
-
-
-                    if (internal.slideBumped === false) {
-
-                        if (options.infinite === false) {
-                             // too far left
-                            if (newRight <= width) {
-                                adjustedLeft = newLeft + width - newRight;
-                                internal.slideBumped = 'left';
-                            }
-
-                            // too far right
-                            if (newLeft >= 0) {
-                                internal.slideBumped = 'right';
-                                adjustedLeft = 0;
-                            }
-                        }
-
-                    } else {
-
-                        if ('left' === internal.slideBumped) {
-                            adjustedLeft = 0;
-                        }
-
-                        if ('right' === internal.slideBumped) {
-                            adjustedLeft = left + width - right;
-                        }
-
-                        internal.slideBumped = false;
-
-                    }
-
-                    // do the animation
-                    busy = true;
-                    that._animate($target, {'left': adjustedLeft}, options.speed, function () {
-                        busy = false;
-                        that._setArrowVisibility();
-                    });
-
-                };
+			var internal = this.internal;
 
 
 			if (false === internal.slideShowActive) {
-				internal.slideShowActive = true;
-				internal.slideTimer = window.setInterval(function () {
-					_step(options.step);
-				}, options.slideSpeed);
+				this.startSlideShow();
 			} else {
-				_stopSlideShow();
+				this.stopSlideShow();
 			}
 
 		},
+
+        _step: function (i) {
+            var that = this,
+                internal = this.internal,
+                options = this.options,
+                $target = $(options.target),
+                width = internal.maskWidth,
+                left = this._round(Math.floor($target.position().left)),
+                newLeft = left + i * internal.unitWidth,
+                right = left + internal.targetWidth,
+                newRight = right + i * internal.unitWidth,
+                adjustedLeft = newLeft;
+
+
+            if (internal.slideBumped === false) {
+
+                if (options.infinite === false) {
+                     // too far left
+                    if (newRight <= width) {
+                        adjustedLeft = newLeft + width - newRight;
+                        internal.slideBumped = 'left';
+                    }
+
+                    // too far right
+                    if (newLeft >= 0) {
+                        internal.slideBumped = 'right';
+                        adjustedLeft = 0;
+                    }
+                }
+
+            } else {
+
+                if ('left' === internal.slideBumped) {
+                    adjustedLeft = 0;
+                }
+
+                if ('right' === internal.slideBumped) {
+                    adjustedLeft = left + width - right;
+                }
+
+                internal.slideBumped = false;
+
+            }
+
+            // do the animation
+            internal.busy = true;
+            this._animate($target, {'left': adjustedLeft}, options.speed, function () {
+                internal.busy = false;
+                that._setArrowVisibility();
+            });
+
+        },
+
+        startSlideShow: function () {
+            var that = this,
+                internal = this.internal,
+                options = this.options;
+
+            if (false === internal.slideShowActive) {
+                internal.slideShowActive = true;
+                internal.slideTimer = window.setInterval(function () {
+                    that._step(options.step);
+                }, options.slideSpeed);
+            }
+        },
+
+        stopSlideShow: function () {
+            var internal = this.internal;
+
+            if (true === internal.slideShowActive) {
+                internal.slideShowActive = false;
+                window.clearInterval(internal.slideTimer);
+            }
+        },
 
         /**
          * Destroy this plugin and clean up modifications the widget has made to the DOM
@@ -1131,10 +1140,9 @@
             var $mask = $(this.options.mask);
 
             // remove events created by this instance
-            $(window).unbind('.responsiveCarousel');
-            $(this.options.arrowLeft).unbind('.responsiveCarousel');
-            $(this.options.arrowRight).unbind('.responsiveCarousel');
-            $target.find('img').unbind('.responsiveCarousel');
+            $(this.options.arrowLeft).unbind(this.instanceId);
+            $(this.options.arrowRight).unbind(this.instanceId);
+            $target.find('img').unbind(this.instanceId);
             if (this.internal.touchObject !== null) {
                 this.internal.touchObject.destroy();
             }
@@ -1151,12 +1159,9 @@
                 });
             },1);
 
-
-
             // For UI 1.8, destroy must be invoked from the base widget
             // $.Widget.prototype.destroy.call(this);
-            // For UI 1.9, define _destroy instead and don't worry about calling the base widget
-
+            // For UI 1.9, there is no need to do anything else, this method has you covered.
         },
 
 
@@ -1173,11 +1178,11 @@
 
             var internal = this.internal,
                 options = this.options,
-                left = $target.position().left,
+                left = Math.floor($target.position().left),
                 right,
                 mod,
                 thresh = internal.unitWidth / -2,
-                width = internal.targetParentInnerWidth,
+                width = internal.maskWidth,
                 newLeft,
                 direction = internal.nudgeDirection,
                 unitWidth = internal.unitWidth,
@@ -1218,7 +1223,7 @@
                     if (leftFlag == true) {
                         // if we dragged too far to the left, we are trying to see the menu item on the far right.
                         if (internal.targetWidth > width) {
-                            newLeft = internal.targetParentInnerWidth - internal.targetWidth;
+                            newLeft = internal.maskWidth - internal.targetWidth;
                         }
                     } else {
                         // if we didn't drag too far to the left, the go to nearest interval
@@ -1242,9 +1247,6 @@
                     }
                 }
             }
-
-
-
 
             // compute the number of the left-most slide and store the number of the left-most slide
             return newLeft;

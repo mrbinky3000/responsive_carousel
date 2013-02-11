@@ -46,7 +46,7 @@ tag */
 }
 
 /* When not clickable */
-.arrow span.disabled {
+.arrow.disabled {
     opacity: 0.3;
     cursor: default;
 }
@@ -119,12 +119,6 @@ However, the height remains untouched.
     padding: 0;
 }
 
-/* Not required, but makes life a lot easier.  You will most likely want to keep it.
-if you are concerned about older browsers, there are shims like:
-https://github.com/Schepp/box-sizing-polyfill  */
-.slider li * {
-    box-sizing: border-box;
-}
 
 /* This element is optional. Keep it and fill it with your own stuff, or replace
 it with your own stuff.  */
