@@ -4,7 +4,7 @@ A fully responsive carousel [jQuery UI widget](http://jqueryui.com/widget/ "jQue
 
 ###Stand-out Features:
 
-- FAST.  Uses css transitions.  Code optomized to use as few redraws as possible.  Always getting faster.
+- FAST.  Uses css transitions.  Code optimized to use as few redraws as possible.  Always getting faster.
 - Continuous infinite scrolling.  Hold down a navigation arrow and keep holding it down. No need to keep clicking or tapping.
 - You can have slide "units" of different widths
 - A callback function that lets you specify the number of units to show at different width
