@@ -186,7 +186,7 @@ Arguments passed to this function by responsiveCarousel are: $el, internal, opti
     });
 
 ####onRedraw  (function)
-A callback function that is implemented whenever the page is done resizing. Arguments passed to this function by responsiveCarousel are: $el, internal, options. Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) You will want to call this manually if your carousel is hidden in a tab or other element set to "display:none".  Call redraw once the parent element is made visible.
+A callback function that fires whenever something happens that would affect the size of stuff in the slider: when the carousel is first created, after a window resize, after an image gets loaded in the carousel, etc. Arguments passed to this function by responsiveCarousel are: $el, internal, options. Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html))
 
 ####ondragstart (function)
 A callback function that is fired when dragging starts. Arguments passed to this function by responsiveCarousel are: options, internal.
