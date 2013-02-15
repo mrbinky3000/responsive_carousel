@@ -129,8 +129,36 @@ __You're going to want to set this to 'compute' on responsive sites.__   'comput
 
  There is a new option added in 1.5, 'individual'.  This lets you have list elements of different (read: non-uniform) widths.  I created this so that I could have a horizontally scrolling navigation menu like some native mobile apps do.
 
+####dragEvents (boolean)
+true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch returns true/false.
+
+####speed   (integer)
+Number milliseconds it takes to scroll one unitWidth to the left or right when you click on an arrow or during the slide show.
+
+####slideSpeed  (integer)
+Number of milliseconds to pause on each slide in a slideshow.
+
+####step (integer)
+How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
+
+####cssAnimations (boolean)
+If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
+
+####nudgeThreshold (integer)
+The minimum amount of pixels the user must drag the target before we force a slide one unit to the left or right.
+
+####infinite (boolean)
+Set this to true to have infinite scrolling. This means when you reach the ends of carousel, the carousel starts over again.  Hint: Combine infinite with toggleSlideShow() to have an infinite slide show. See [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html "Example 2") and [Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html "Example 4")
+
+####delta
+A force-multiplier for dragging slides, like a lever. The larger the number, the faster your slider will slide to the left or right when dragging.
+
+
+
+## Callback Options
+
 ####responsiveUnitSize  (function)
-This is only used if your unitWidth is set to 'compute'.  It is a callback function that should return an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.  Here is an example of usage below.
+Arguments passed to this function by responsiveCarousel are: $el, internal, options.  This is only used if your unitWidth is set to 'compute'.  It is a callback function that should return an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.  Here is an example of usage below.
 
     var winW;
 
@@ -157,48 +185,20 @@ This is only used if your unitWidth is set to 'compute'.  It is a callback funct
         }
     });
 
-
 ####onRedraw  (function)
-A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) You will want to call this manually if your carousel is hidden in a tab or other element set to "display:none".  Call redraw once the parent element is made visible.
+A callback function that is implemented whenever the page is done resizing. Arguments passed to this function by responsiveCarousel are: $el, internal, options. Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) You will want to call this manually if your carousel is hidden in a tab or other element set to "display:none".  Call redraw once the parent element is made visible.
 
 ####ondragstart (function)
-A callback function that is fired when dragging starts.
+A callback function that is fired when dragging starts. Arguments passed to this function by responsiveCarousel are: options, internal.
 
 ####ondragend (function)
-A callback function that is fired when dragging ends.
-
-####dragEvents (boolean)
-true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch returns true/false.
-
-####speed   (integer)
-Number milliseconds it takes to scroll one unitWidth to the left or right when you click on an arrow or during the slide show.
-
-####slideSpeed  (integer)
-Number of milliseconds to pause on each slide in a slideshow.
-
-####onShift (function)
-A function that is called each time the slider shifts to the left or right.
-
-####step (integer)
-How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
+A callback function that is fired when dragging ends. Arguments passed to this function by responsiveCarousel are: options, internal.
 
 ####responsiveStep (function)
-A function that returns an integer representing the number of unitWidths to slide when the arrows are pressed.
+NOT IMPLEMENTED YET:  It will be a function that returns an integer representing the number of unitWidths to slide during a slide show or when arrows are pressed.
 
 ####onShift  (function)
-A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Could for triggering other events on the page based on the current left-most visible slide.  [See example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) to see this in use.
-
-####cssAnimations (boolean)
-If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
-
-####nudgeThreshold (integer)
-The minimum amount of pixels the user must drag the target before we force a slide one unit to the left or right.
-
-####infinite (boolean)
-Set this to true to have infinite scrolling. This means when you reach the ends of carousel, the carousel starts over again.  Hint: Combine infinite with toggleSlideShow() to have an infinite slide show. See [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html "Example 2") and [Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html "Example 4")
-
-####delta
-A force-multiplier for dragging slides, like a lever. The larger the number, the faster your slider will slide to the left or right when dragging.
+A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Arguments passed to this function by responsiveCarousel are: i (the number of the current left-most visible slide starting from 0). Could for triggering other events on the page. based on the current left-most visible slide.  [See example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) to see this in use.
 
 
 ## Methods
