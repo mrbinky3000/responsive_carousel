@@ -1,27 +1,3 @@
-/*jslint nomen: true, browser: true, white: true, todo: true */
-/*global Modernizr, Hammer, jQuery */
-/*properties
-    Widget, _animate, _clearInterval, _create, _doArrowBeingClicked, _dragEvents,
-    _getPrefix, _setArrowEvents, _setArrowVisibility, _setTargetWidth,
-    _setUnitWidth, abs, animate, arrowLeft, arrowLeftVisible, arrowRight,
-    arrowRightVisible, attr, call, charAt, clearInterval, clearTimeout,
-    computeAdjust, createElement, css, cssAnimations, csstransitions,
-    currentSlide, data, 'data-slide', destroy, direction, distance, drag,
-    dragEvents, drag_horizontal, drag_min_distance, drag_vertical, each, element,
-    eq, find, firstMouseClick, floor, get, getCurrentSlide, getTime, goToSlide,
-    hasOwnProperty, height, hold, infinite, innerWidth, internal,
-    isArrowBeingClicked, isFunction, left, length, mask, nudgeDirection,
-    nudgeThreshold, numUnits, numVisibleUnits, on, onRedraw, onShift,
-    ondrag, ondragend, ondragstart, options, outerHeight, outerWidth, parent,
-    parents, position, prefix, preventDefault, prototype, redraw, responsiveStep,
-    responsiveUnitSize, setInterval, setTimeout, slice, slideBumped,
-    slideShowActive, slideSpeed, slideTimer, speed, step, stop, style, tap,
-    tap_double, target, targetBackupCopy, targetLeft, targetOuterHeight,
-    targetOuterWidth, targetParentInnerWidth, targetParentMarginLeft,
-    targetParentOuterHeight, targetParentOuterWidth, targetWidth, thenDo, time,
-    timer, toLowerCase, toUpperCase, toggleSlideShow, top, transform, unbind,
-    unitElement, unitWidth, wait, widget, width
-*/
 /*!
  * responsiveCarousel
  * A responsive carousel that works in desktop browsers, ipad, iphone, and even
@@ -31,11 +7,13 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 1.5.0
- * @releaseDate 2/11/2013
+ * @version 1.5.1
+ * @releaseDate 2/15/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
- * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
+ * @requires jQuery, jQuery UI (only the Core and Widget Factory)
+ * @requires hammer.js (for touch and drag events, mouse drag too)
+ * @recommended Modernizr (used to test for css3 transitions and touch screens)
  */
 (function ($, window, document) {
     "use strict";
@@ -64,7 +42,7 @@
 			responsiveStep: null,
             onShift: null,
             cssAnimations: Modernizr.csstransitions,
-            nudgeThreshold: 10,
+            nudgeThreshold: 50,
             infinite: false,
             delta: 1
         },
@@ -190,6 +168,8 @@
             // stupid hack! For some reason, if the code below is not delayed the transitions bellow occur BEFORE
             // the code above where transitions are turned off and the slider jumps to the start of the clones
             // or to the start of the slider.  I think it has to do with how browsers render CSS that originates in JS.
+            // I think that no matter the order in which CSS is applied in JS, the browser renders transitions in
+            // a specific order. I could be wrong.  Let me know if I am!
             window.setTimeout(function () {
                 if (options.cssAnimations) {
                     _transition($.extend({transition :  'left ' + speed / 1000 + 's ' + options.easing }, props));
@@ -286,6 +266,7 @@
                 $arrowRight = $(options.arrowRight),
                 maskLeft = 0,
                 p,
+                i,
                 maskRight = internal.maskWidth,
                 currentLeft  = this._round(Math.floor($target.position().left)), // position does not include for margin & border of parent
                 currentRight = internal.targetWidth + currentLeft;
@@ -339,10 +320,15 @@
             } else {
                 // All the other unit width modes (compute, inherit, integer) have units with the same
                 // width. So, it's easy to use math to find the current leftmost element.
+                // this could be NaN if slider is display:none.
                 internal.currentSlide = $(options.unitElement).eq([Math.abs(currentLeft / internal.unitWidth)]).data('slide');
+
             }
 			if ($.isFunction(options.onShift)) {
-				options.onShift(internal.currentSlide);
+                i = internal.currentSlide;
+                if (typeof i === 'number') { // carousel might be hidden and therefore has no dimensions. So, no shift.
+                    options.onShift(i);
+                }
 			}
 
             // be nice to lazy loading
@@ -751,10 +737,13 @@
                 $mask = $(options.mask),
                 content = $target,
                 hammer = new Hammer($mask.get(0), {
+                    prevent_default: false,
+                    css_hacks: true,
                     drag: true,
                     drag_vertical: false,
                     drag_horizontal: true,
                     drag_min_distance: 10,
+                    swipe: false,
                     transform: false,
                     tap: false,
                     tap_double: false,
@@ -777,14 +766,16 @@
 
             hammer.ondragstart = function () {
 
+                // stop the slide show if any
+                that.stopSlideShow();
+
                 if (true === internal.isArrowBeingClicked || true === internal.busy) {
                     // prevent jitters due to fat fingers touching scroll arrow and carousel at same time.
                     // if we're already busy, ignore
                     return {};
                 }
 
-                // stop the slide show if any
-                that.stopSlideShow();
+
 
                 internal.busy = true;
 
@@ -811,14 +802,17 @@
             hammer.ondrag = function (ev) {
 
                 // insurance just in case the dragend event does not fire due to a very quick touch
-                // combined with a very slow device
-                clearTimeout(delay);
+                // combined with a very slow device.  This is a documented bug with hammer.js issue 67
+                // turning swipe to false fixes it, this is here just in case of future bugs in hammer.
+                if (delay) {
+                    clearTimeout(delay);
+                }
                 delay = setTimeout(function(){
                     if (internal.busy === true) {
                         //$('.log').prepend('backup dragend trigger</br>');
                         hammer.ondragend();
                     }
-                },100);
+                },400);
 
                 if (true === internal.isArrowBeingClicked) {
                     // prevent jitters due to fat fingers touching scroll arrow and carousel at same time.
@@ -846,7 +840,9 @@
                     } else {
                         internal.nudgeDirection = 'right';
                     }
-                }  else {
+                } else if (distance <= options.nudgeThreshold) {
+                    internal.nudgeDirection = 'abort';
+                } else {
                     internal.nudgeDirection = null;
                 }
 
@@ -857,9 +853,11 @@
                 if (options.infinite === true) {
                     if (left <= startOfClones) {
                         left = 0 + ev.distance * delta;
+                        internal.scrollStart.left = 0;
                     }
                     if (left >= 0) {
                         left = startOfClones + ev.distance * delta;
+                        internal.scrollStart.left = startOfClones;
                     }
                 }
 
@@ -870,6 +868,9 @@
             };
 
             hammer.ondragend = function () {
+                if (delay) {
+                    window.clearTimeout(delay);
+                }
                 $target.stop(true, false);
                 that._animate($target, {left: that.computeAdjust($target)}, options.speed, function () {
                     that._setArrowVisibility();
@@ -1174,21 +1175,17 @@
          */
         computeAdjust : function ($target) {
 
-            //$('.log').prepend('comp adj<br/>');
 
             var internal = this.internal,
                 options = this.options,
                 left = Math.floor($target.position().left),
                 right,
-                mod,
-                thresh = internal.unitWidth / -2,
                 width = internal.maskWidth,
                 newLeft,
                 direction = internal.nudgeDirection,
                 unitWidth = internal.unitWidth,
                 p,
                 leftFlag = false;
-
 
             // nudged with finger or mouse past the threshold level
             if (direction !== null) {
@@ -1198,7 +1195,11 @@
                 if (direction === 'right') {
                     newLeft = left + unitWidth;
                 }
+                if (direction === 'abort') {
+                    newLeft = internal.scrollStart.left;
+                }
                 left = newLeft;
+                internal.nudgeDirection = null;
             }
 
             // entire slider is too far left
@@ -1234,18 +1235,12 @@
                     }
 
                 }
+                // get rid of sub pixels
+                // newLeft = Math.floor(newLeft);
             } else {
                 // all other options for options.unitWidth  (integer, compute, inherit) have uniform widths
-                mod = left % this.internal.unitWidth;
-                if (mod !== 0) {
-
-                    if (mod < thresh) {
-                        newLeft =  left - (this.internal.unitWidth + mod);
-                    }
-                    if (mod > thresh) {
-                        newLeft = left - mod;
-                    }
-                }
+                // move to the closest left border via _round()
+                newLeft = this._round(left);
             }
 
             // compute the number of the left-most slide and store the number of the left-most slide

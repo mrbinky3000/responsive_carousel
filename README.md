@@ -159,7 +159,7 @@ This is only used if your unitWidth is set to 'compute'.  It is a callback funct
 
 
 ####onRedraw  (function)
-A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html))
+A callback function that is implemented whenever the page is done resizing.  Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) You will want to call this manually if your carousel is hidden in a tab or other element set to "display:none".  Call redraw once the parent element is made visible.
 
 ####ondragstart (function)
 A callback function that is fired when dragging starts.
@@ -238,6 +238,11 @@ Clean up all event handlers and HTML added by this widget.
 
 
 ##Change Log
+
+### Version 1.5.1 - 2/15/2013
+- Bugfix where internal.nudgeDirection was never reset to null between nudges causing unwanted slider advancement under certain conditions
+- onShift function was returning fractions of pixels or NAN if the carousel was hidden.
+- hammer.js "swipe" event was causing weirdness.  Disabled, as it is unnecessary for our needs.
 
 ### Version 1.5.0 - 2/11/2013
 - I had to invest LOTS of time into getting this ready for a major Fortune 500 client.  It's no longer beta.  It's ready for the real world! (It better be, because it's going to be used a lot on that web site)
