@@ -198,7 +198,7 @@ A callback function that is fired when dragging ends. Arguments passed to this f
 NOT IMPLEMENTED YET:  It will be a function that returns an integer representing the number of unitWidths to slide during a slide show or when arrows are pressed.
 
 ####onShift  (function)
-A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Arguments passed to this function by responsiveCarousel are: i (the number of the current left-most visible slide starting from 0). Could for triggering other events on the page. based on the current left-most visible slide.  [See example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) to see this in use.
+A callback function that is triggered after the carousel is moved to the left or right any amount of unitWidths.  Arguments passed to this function by responsiveCarousel are: i (the number of the current left-most visible slide starting from 0). Could for triggering other events on the page. based on the current left-most visible slide.  [See example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) to see this in use.  Note for IE8:  If you use custom web fonts (glyphs) in any of the slides, or for signposts (signposts = those dots in the slideshow example) then don't use [data-icon]:before to insert the glyphs.  It will cause onShift to seem like it's miss-firing.
 
 
 ## Methods
@@ -238,6 +238,11 @@ Clean up all event handlers and HTML added by this widget.
 
 
 ##Change Log
+
+### Version 1.5.2 - 3/5/2013
+- The latest update to Apple's OS introduced a scrolling bug that causes the carousels to become non-responsive.  Fixed.
+- Fixed issues when a carousel is created in a hidden parent container.
+- Various ie8, ie9, Apple fixes.  Please note: webfonts + [data-icon]:before = onShift callback FAIL!  Nothing I can do about this one, it's ie8.
 
 ### Version 1.5.1 - 2/15/2013
 - Bugfix where internal.nudgeDirection was never reset to null between nudges causing unwanted slider advancement under certain conditions
