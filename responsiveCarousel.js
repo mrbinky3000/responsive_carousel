@@ -8,8 +8,8 @@
  *
  * This is a jQuery UI Widget
  *
- * @version 1.7.0
- * @releaseDate 5/22/2013
+ * @version 1.7.1
+ * @releaseDate 5/23/2013
  * @author Matthew Toledo
  * @url https://github.com/mrbinky3000/responsive_carousel
  * @requires jQuery, jQuery UI (only the Core and Widget Factory), modernizr (only css3 transitions test, touch test optional), hammer.js
@@ -1161,7 +1161,6 @@
             var internal = this.internal,
                 id = this.instanceId,
                 options = this.options,
-                $units = $(options.unitElement),
                 i,
                 j = internal.currentSlide + internal.numVisibleUnits * 2;
 
@@ -1170,16 +1169,18 @@
             }
 
             function _loadInitialImages() {
-                var $unit;
+                var $unit,
+                    $units = $(options.unitElement);
 
                 for (i = internal.currentSlide; i < j; i = i + 1) {
                     $unit = $units.eq(i);
                     if ($unit.length) {
-                        $unit.find('img.lazy-slider:not([loaded="true"])').map(_triggerAppear);
+                        $unit.find('img.lazy-slider:not([loaded="true"])').each(function(){
+                            _triggerAppear(this);
+                        });
                     }
                 }
             }
-
 
             function _loadAllImages() {
                 var count = 0;
