@@ -301,6 +301,10 @@ Clean up all event handlers and HTML added by this widget.
 
 ##Change Log
 
+### Version 1.7.0 - 5/22/2013
+- MAJOR bug fixes on all fronts due to tons of time spent Q.A.-ing the carousel for a major client.  Tons of updates in
+speed, functionality, optimization, and improvements to the carousel when in 'individual' mode.
+
 ### Version 1.5.2 - 3/5/2013
 - The latest update to Apple's OS introduced a scrolling bug that causes the carousels to become non-responsive.  Fixed.
 - Fixed issues when a carousel is created in a hidden parent container.
@@ -317,11 +321,11 @@ Clean up all event handlers and HTML added by this widget.
 ### Version 0.5.1 - 1/16/2013
 - Bugfixes with nudgeThreshold option.  It was sometimes skipping a unit, going from 1 to 3 bypassing 2, for example. Fixed now.
 
-#### Version 0.5.0 - 1/15/2013
+### Version 0.5.0 - 1/15/2013
 - New Feature: Infinite Scrolling!
 - Bugfixes and speed enhancements
 
-#### Version 0.4.0 - 1/10/2013
+### Version 0.4.0 - 1/10/2013
 - Bugfix. Script to determine vendor prefix for CSS transitions were not working on Firefox.  Switched to a new method.
 - Added "nudgeThreshold" option so people can slide to the next slide with a little flick instead of dragging half the distance of the entire slide.  I think this improves the user experience.
 - Updated example 1 so that people can use their mouse to drag the carousel on non-touch screens.
