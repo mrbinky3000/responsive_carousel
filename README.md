@@ -1,15 +1,15 @@
 #Responsive Carousel
 
-A fully responsive carousel [jQuery UI widget](http://jqueryui.com/widget/ "jQuery UI widget documentation") that works on desktop browsers, iPhones, iPads, and even older Androids.* It can be configured to respond to touch events, mouse events, or both.  You can use the left and right arrows and/or use your finger or mouse to swipe the carousel left and right.  The code is currently is in the form of a jQuery UI widget and relies on hammer.js to handle the touch events.
+A fully responsive carousel [jQuery UI widget](http://jqueryui.com/widget/ "jQuery UI widget documentation") that works on desktop browsers, iPhones, iPads, and even older Androids.* It can be configured to respond to touch events, mouse events, or both.  You can use the left and right arrows and/or use your finger or mouse to swipe the carousel left and right.  Combine with the popular lazyLoad.js plugin to lazy load images in your carousel, thus cutting page load times (great for mobile). The code is currently is in the form of a jQuery UI widget and relies on hammer.js to handle the touch events.
 
 ###Stand-out Features:
 
 - FAST.  Uses css transitions.  Code optimized to use as few redraws as possible.  Always getting faster.
 - Continuous infinite scrolling.  Hold down a navigation arrow and keep holding it down. No need to keep clicking or tapping.
-- You can have slide "units" of different widths
+- You can have slide "units" of different widths!  Great for navigation menus.
 - A callback function that lets you specify the number of units to show at different width
 - Loose HTML. This doesn't force you to use certain HTML structures.  Your navigation can be anywhere in the DOM.
-
+- Optionally works with the popular [Lazy Load jQuery Plugin](http://www.appelsiini.net/projects/lazyload) Images that are out of view are not loaded until the user interacts with the carousel.
 
 
 
@@ -20,10 +20,12 @@ See it in Action:
 - [Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) : A simulated product shelf.  The number and size of the boxes change based on the width of the window.
 - [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html) : A simulated hero slide show.  There is only one unit visible at a time.  Uses callbacks to add more functionality to the slideshow.
 - [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html) : Same as example 1 but with added infinite scrolling.
-- [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html) : A slideshow showing 2 slides at a time and featuring infinite scrolling.
+- [Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html) : A slideshow showing 2 slides at a time and featuring infinite scrolling.
+- [Example 5](http://matthewtoledo.com/creations/responsive-carousel/example/example-5.html) : Horizontal navigation demo with units of different widths.
 
 *The carousel animation runs a little slow on some older Androids that don't 
-support CSS3 transitions.  If Facebook's javascript API is also included on the page it will further slow down older Androids because Facebook causes page reflows every few miliseconds.
+support CSS3 transitions.  If Facebook's javascript API is also included on the page it will
+further slow down older Androids because Facebook causes page reflows every few milliseconds.
 
 
 
@@ -33,12 +35,11 @@ support CSS3 transitions.  If Facebook's javascript API is also included on the 
 Please help me out by testing on other browsers so I can add to the support list. I have tested this on the following browsers:
 - IE7 and higher
 - Chrome 21 and higher
+- Mobile Chrome Browser 20 and higher (Android 4.2 and higher)
 - Safari 5.1.7 and higher
+- Mobile Safari (iPhone / iPad) 5.1.7 and higher
 - FireFox 14 and higher
-- iPhone / iPad (safari)
-- Android Browser (~Chrome 12)
-
-
+- Android Browser (~Chrome 12-ish, Approximately, Android 4.0 to 4.1)
 
 
 ##Overhead
@@ -83,82 +84,139 @@ Please report any bugs encountered!  I will fix em'
 Here are the default options:
 
         options: {
-            arrowLeft: '.arrow-left span',
-            arrowRight: '.arrow-right span',
-            target: '.slider-target',
+            arrowLeft: '.arrow-left',
+            arrowRight: '.arrow-right',
             mask: '.slider-mask',
+            target: 'ul',
             unitElement: 'li',
             unitWidth: 'inherit',
             responsiveUnitSize: null,
             onRedraw: null,
+            ondragstart: null,
+            ondragend: null,
             dragEvents: false,
+            easing: 'linear',
 			speed: 400,
 			slideSpeed: 2500,
 			step: -1,
 			responsiveStep: null,
-		    onShift: null,
+            onShift: null,
             cssAnimations: Modernizr.csstransitions,
             nudgeThreshold: 10,
-			infinite: false
+            infinite: false,
+            delta: 1,
+            dragVertical: false,
+            dragPreventDefault: false,
+            lazyload: false // work with lazyload.js plugin http://www.appelsiini.net/projects/lazyload
         },
 
-####arrowLeft  (string)
-A css selector representing the left arrow.  NOTE: This should be a span or other element instead of an anchor tag.  Our responsiveCarousel script lets you hold down
-the arrow buttons for continuous scrolling.  If the arrows are anchor tags, Android devices will prompt you to save the target URL for the anchor. It's impossible to turn this "feature" off.
-Don't make the arrows anchors or buttons.  I recommend div or span elements. the script will attach the correct event listeners.  You just need to add
-css so when the mouse hovers over your arrow element, it gets the same pointer as an anchor tag.
 
-Your arrow tags can be ANYWHERE on the page.  They do not need to be child elements.  You can also set your select in such a way that you can have multiple buttons that control the slider.
+####arrowLeft  (css selector string)
+A css selector representing the left arrow.  NOTE: This should be a span or other element instead of an anchor tag.  Our
+responsiveCarousel script lets you hold down the arrow buttons for continuous scrolling.  If the arrows are anchor tags,
+Android devices will prompt you to save the target URL for the anchor. It's impossible to turn this "feature" off. Don't
+make the arrows anchors or buttons.  I recommend div or span elements. the script will attach the correct event
+listeners.  You just need to add css so when the mouse hovers over your arrow element, it gets the same pointer as an
+anchor tag.
 
-####arrowRight (string)
+Your arrow tags can be ANYWHERE on the page.  They do not need to be children of the DOM element where you attached
+responsiveCarousel.  Heck, you can even attach the carousel to $(document) if you like. You can also set your select in
+such a way that you can have multiple buttons that control the slider.
+
+####arrowRight (css selector string)
 See above.
 
-####target (string)
-A css selector representing the actual DOM element that will slide behind the masking dom element.  Usually this is an unordered list containing list elements. Do not give CSS borders, margin, or padding to the target.
+####mask (css selector string)
+A css selector representing the immediate parent of the the target element.  This element has visibility set to
+"overflow hidden" and helps us give the illusion of a horizontal scroll. Do not give the mask CSS borders, margins or
+padding.
 
-####mask (string)
-A css selector representing the immediate parent of the the target element.  This element is set to overflow hidden and helps us give the illusion of a horizontal scroll. Do not give the mask CSS borders, margins or padding.
+####target (css selector string)
+A css selector representing the actual DOM element that will slide behind the masking dom element.  Usually this is an
+unordered list containing list elements. Do not give CSS borders, margin, or padding to the target.
 
-####unitElement  (string)
-A css selector representing the child elements of target.  Usually, these are list elements.  Do not apply border, margin, or padding to these elements. If you need spacing, add div's inside the unitElement and apply borders, padding, and margins to the div.
+####unitElement  (css selector string)
+A css selector representing the child elements of target.  Usually, these are list elements.  Do not apply border,
+margin, or padding to these elements. If you need spacing, add div's inside the unitElement and apply borders, padding,
+and margins to the div.
 
 ####unitWidth  (string)
-__You're going to want to set this to 'compute' on responsive sites.__   'compute' relies on the responsiveUnitSize function below to provide the number of units to show in the carousel at a particular width. [See example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) for details.
+__You're going to want to set this to 'compute' on responsive sites.__   'compute' relies on the responsiveUnitSize
+function below to provide the number of units to show in the carousel at a particular width.
+[See example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html) for details.
 
  The default, 'inherit', inherits the width from your current CSS and is best suited for static, non-responsive sites.
 
- There is a new option added in 1.5, 'individual'.  This lets you have list elements of different (read: non-uniform) widths.  I created this so that I could have a horizontally scrolling navigation menu like some native mobile apps do.
+ There is a new option added in 1.5, 'individual'.  This lets you have list elements of different (read: non-uniform)
+ widths.  I created this so that I could have a horizontally scrolling navigation menu like some native mobile apps do.
+ [See example 5](http://matthewtoledo.com/creations/responsive-carousel/example/example-5.html)
+
+####responsiveUnitSize (function)
+This is only required if unitWidth is set to 'compute'.  See full details in the "Callback Options" section of the
+documentation.
 
 ####dragEvents (boolean)
-true enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr.touch returns true/false.
+Setting this to "true" enables touch & mouse drag events.  false turns them off.  Hint:  Modernizr's property,
+Modernizr.touch, returns a boolean true or false.  You can enable "mousedrag" events on desktop computers if this is set
+to true for non-touch devices.  Note:  mousedrag only works best on carousels that do not contain images or anchor tags,
+as your browser lets you drag images and anchors to new tabs so you can open them.  This is built-in browser behavior
+that is hard to prevent reliably across all browsers.
+
+####easing (string)
+Used when "cssAnimations" option is set to boolean true. This is the same as the css-animation-timing property options
+for CSS3 transitions.  To recap, they are: 'linear','ease','ease-in','ease-out','ease-in-out', and
+'cubic-bezier(n,n,n,n)' [More details here](http://www.w3schools.com/cssref/css3_pr_animation-timing-function.asp)
 
 ####speed   (integer)
-Number milliseconds it takes to scroll one unitWidth to the left or right when you click on an arrow or during the slide show.
+Number milliseconds it takes to scroll one unitWidth to the left or right when you click on an arrow or during the slide
+show.
 
 ####slideSpeed  (integer)
 Number of milliseconds to pause on each slide in a slideshow.
 
 ####step (integer)
-How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive numbers move to the right. Hint:  You can go by groups of four or five.  Use a function that returns an integer for more dynamic / responsive results.
+How many unitWidths to move to the left or right during a slide show.  -1 moves 1 unitWidth to the left. Positive
+numbers move to the right. Hint:  You can go by groups of four or five.  Set this option to a function that returns an
+integer for more dynamic / responsive results.
 
 ####cssAnimations (boolean)
-If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower (on older devices) jQuery animations.
+If the browser supports css3, then we use the much faster css3 transitions.  Otherwise, fall back to slower
+(on older devices) jQuery animations.
 
 ####nudgeThreshold (integer)
-The minimum amount of pixels the user must drag the target before we force a slide one unit to the left or right.
+The minimum amount of pixels the user must drag the target before we force a slide one unit to the left or right.  If
+your carousel scrolls too easily on mobile devices when you scroll the page vertically, you can increase this value.
+Just make sure that it's generally less than 1/3 the minimum width you anticipate for each carousel unit element.
 
 ####infinite (boolean)
-Set this to true to have infinite scrolling. This means when you reach the ends of carousel, the carousel starts over again.  Hint: Combine infinite with toggleSlideShow() to have an infinite slide show. See [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html "Example 2") and [Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html "Example 4")
+Set this to true to have infinite scrolling. This means when you reach the ends of carousel, the carousel starts over
+again.  Hint: Combine infinite with toggleSlideShow() to have an infinite slide show.
+See [Example 3](http://matthewtoledo.com/creations/responsive-carousel/example/example-3.html "Example 2") and
+[Example 4](http://matthewtoledo.com/creations/responsive-carousel/example/example-4.html "Example 4")
 
-####delta
-A force-multiplier for dragging slides, like a lever. The larger the number, the faster your slider will slide to the left or right when dragging.
+####delta (integer)
+A force-multiplier for dragging slides, like a lever, that increases the speed the carousel moves when you drag it
+from side to side. The larger the number, the faster your slider will slide to the left or right when dragging.
 
+####lazyLoad (boolean)
+Use the [Lazy Load](http://www.appelsiini.net/projects/lazyload) plugin for jQuery in combination with this plugin.
+Carousels exist so they can contain a lot of information "above the fold" (I know, there is no fold on the Interwebz,
+but clients still ask for stuff above it.)  As a result a lot of images can load that aren't even used unless the user
+interacts with the carousel.  To use this option, include lazyLoad.js in your page and format your image tags according
+to that plug-in's documentation.  When the carousel is created, all the visible images are loaded by default but
+the images that are not visible are deferred until the user starts to interact with the carousel by pressing the
+navigation arrows, moving their mouse over the carousel, or using their finger to drag the carousel.
+
+    <img data-original=“img/example.jpg” src=“img/grey.gif”>
 
 
 ## Callback Options
 
 ####responsiveUnitSize  (function)
-Arguments passed to this function by responsiveCarousel are: $el, internal, options.  This is only used if your unitWidth is set to 'compute'.  It is a callback function that should return an integer representing the number of unitElements that should be visible in the carousel  at one time.  See the examples ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.  Here is an example of usage below.
+Arguments passed to this function by responsiveCarousel are: $el, internal, options.  This is only used if your
+unitWidth is set to 'compute'.  It is a callback function that should return an integer representing the number of
+unitElements that should be visible in the carousel  at one time.  See the examples
+([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html)) for more details.  Here is an example of usage below.
 
     var winW;
 
@@ -186,7 +244,11 @@ Arguments passed to this function by responsiveCarousel are: $el, internal, opti
     });
 
 ####onRedraw  (function)
-A callback function that fires whenever something happens that would affect the size of stuff in the slider: when the carousel is first created, after a window resize, after an image gets loaded in the carousel, etc. Arguments passed to this function by responsiveCarousel are: $el, internal, options. Can be called manually to.  See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html), [Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html))
+A callback function that fires whenever something happens that would affect the size of stuff in the slider, e.g.
+when the carousel is first created, after a window resize, after an image gets loaded in the carousel, etc.
+Arguments passed to this function by responsiveCarousel are: $el, internal, options. Can be called manually to.
+See examples. ([Example 1](http://matthewtoledo.com/creations/responsive-carousel/example/example-1.html),
+[Example 2](http://matthewtoledo.com/creations/responsive-carousel/example/example-2.html))
 
 ####ondragstart (function)
 A callback function that is fired when dragging starts. Arguments passed to this function by responsiveCarousel are: options, internal.
