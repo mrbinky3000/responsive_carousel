@@ -301,7 +301,7 @@ Clean up all event handlers and HTML added by this widget.
 
 ##Change Log
 
-### Version 1.7.3
+### Version 1.7.3 - 6/27/2013
 - Bug fixes for the "individual" mode ("individual" is when slides in the carousel have different fixed widths)
 - Further speed enhancements for "individual" mode by using reverse while loops
 
