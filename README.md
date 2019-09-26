@@ -1,4 +1,4 @@
-Obviously, this repo is no longer maintained.  However, if you still use jQuery UI, drop me a line and I might help.  In the meantime, check out my new carousel for React, Pure React Carousel [github](https://github.com/express-labs/pure-react-carousel#readme) [demo](https://express-labs.github.io/pure-react-carousel/)
+Obviously, this repo is no longer maintained.  However, if you still use jQuery UI, drop me a line and I might help.  In the meantime, check out my new carousel for React, Pure React Carousel [[github]](https://github.com/express-labs/pure-react-carousel#readme) [[demo]](https://express-labs.github.io/pure-react-carousel/)
 
 
 # Responsive Carousel
